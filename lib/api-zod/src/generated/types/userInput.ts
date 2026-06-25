@@ -13,7 +13,6 @@ export interface UserInput {
   /** @minLength 1 */
   displayName: string;
   role: UserInputRole;
-  /** @nullable */
-  businessUnitId?: number | null;
+  businessUnitIds?: number[];
   isActive?: boolean;
 }

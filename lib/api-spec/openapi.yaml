@@ -981,7 +981,7 @@ components:
         - error
     Persona:
       type: object
-      required: [key, label, role]
+      required: [key, label, role, businessUnitNames]
       properties:
         key:
           type: string
@@ -989,8 +989,10 @@ components:
           type: string
         role:
           type: string
-        businessUnitName:
-          type: ["string", "null"]
+        businessUnitNames:
+          type: array
+          items:
+            type: string
     LoginInput:
       type: object
       required: [persona]
@@ -999,7 +1001,7 @@ components:
           type: string
     AuthUser:
       type: object
-      required: [id, email, displayName, role]
+      required: [id, email, displayName, role, businessUnits]
       properties:
         id:
           type: integer
@@ -1009,10 +1011,18 @@ components:
           type: string
         role:
           type: string
-        businessUnitId:
-          type: ["integer", "null"]
-        businessUnitName:
-          type: ["string", "null"]
+        businessUnits:
+          type: array
+          items:
+            $ref: "#/components/schemas/BusinessUnitRef"
+    BusinessUnitRef:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
     BusinessUnit:
       type: object
       required: [id, name, code, isActive, createdAt, updatedAt]
@@ -1414,7 +1424,18 @@ components:
           type: ["string", "null"]
     User:
       type: object
-      required: [id, email, displayName, role, isActive, createdAt, updatedAt]
+      required:
+        [
+          id,
+          email,
+          displayName,
+          role,
+          businessUnits,
+          businessUnitIds,
+          isActive,
+          createdAt,
+          updatedAt,
+        ]
       properties:
         id:
           type: integer
@@ -1425,10 +1446,14 @@ components:
         role:
           type: string
           enum: [HRBP, HR_DIRECTOR, CHRO, ADMIN]
-        businessUnitId:
-          type: ["integer", "null"]
-        businessUnitName:
-          type: ["string", "null"]
+        businessUnits:
+          type: array
+          items:
+            $ref: "#/components/schemas/BusinessUnitRef"
+        businessUnitIds:
+          type: array
+          items:
+            type: integer
         entraObjectId:
           type: ["string", "null"]
         isActive:
@@ -1450,8 +1475,10 @@ components:
         role:
           type: string
           enum: [HRBP, HR_DIRECTOR, CHRO, ADMIN]
-        businessUnitId:
-          type: ["integer", "null"]
+        businessUnitIds:
+          type: array
+          items:
+            type: integer
         isActive:
           type: boolean
     UserUpdate:
@@ -1466,8 +1493,10 @@ components:
         role:
           type: string
           enum: [HRBP, HR_DIRECTOR, CHRO, ADMIN]
-        businessUnitId:
-          type: ["integer", "null"]
+        businessUnitIds:
+          type: array
+          items:
+            type: integer
         isActive:
           type: boolean
     AuditLogEntry:

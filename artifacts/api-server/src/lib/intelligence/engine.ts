@@ -764,7 +764,7 @@ export async function buildWorkforceContext(
       return {
         businessUnitId: u.id,
         businessUnitName: u.name,
-        kpis: await computeKpis(u.id),
+        kpis: await computeKpis([u.id]),
         facts: f,
         healthScore: health.score,
         healthRating: health.rating,
@@ -781,7 +781,6 @@ export async function buildWorkforceContext(
     }),
   );
 
-  const orgBuId = buIds != null && buIds.length === 1 ? buIds[0] : null;
   const totalHeadcount = businessUnits.reduce((s, b) => s + b.kpis.headcount, 0);
   const averageHealthScore =
     businessUnits.length === 0
@@ -798,8 +797,8 @@ export async function buildWorkforceContext(
     org: {
       businessUnitCount: businessUnits.length,
       totalHeadcount,
-      kpis: await computeKpis(orgBuId),
-      trends: await computeTrends(orgBuId),
+      kpis: await computeKpis(buIds),
+      trends: await computeTrends(buIds),
       averageHealthScore,
     },
     businessUnits,

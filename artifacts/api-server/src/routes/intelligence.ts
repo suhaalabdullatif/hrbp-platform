@@ -31,7 +31,7 @@ function scopeToBuIds(
   const filter = resolveBusinessUnitFilter(scope, requested);
   if (filter === "none") return "empty";
   if (filter === "all") return null;
-  return [filter];
+  return filter;
 }
 
 router.get(

@@ -1,4 +1,5 @@
 - [Orval/Drizzle date serialization](orval-drizzle-dates.md) — generated Zod types timestamps as plain strings; convert Drizzle `Date` columns before `.parse()`.
-- [Business-unit isolation](bu-isolation.md) — scoped writes must also block BU-moves on PATCH and validate cross-BU foreign-key (employeeId) refs on create, not just the existing row's scope.
-- [HUMAIN brand design system](humain-brand-system.md) — token-driven theming in index.css rebrands whole shadcn lib; Optician Sans from npm; keep h1/h2 natural-case (no global uppercase) and sidebar aqua deep enough for AA.
-- [React Query auth cache](react-query-auth-cache.md) — logout/persona-switch must `queryClient.clear()` or stale cached currentUser bounces login→app as old role; gate role-only UI in both nav and in-page CTAs.
+- [Business-unit isolation](bu-isolation.md) — BU scope is many-to-many (user_business_units); filter on the assigned id set, block BU-moves on PATCH, validate cross-BU FK refs on create.
+- [HUMAIN brand design system](humain-brand-system.md) — token-driven theming rebrands whole shadcn lib; keep h1/h2 natural-case; sidebar aqua deep enough for AA.
+- [React Query auth cache](react-query-auth-cache.md) — logout/persona-switch must clear query cache or stale currentUser bounces login→app as old role.
+- [Auth login response shape](bu-isolation.md) — build the returned AuthUser from the user row (not getCurrentUser(req)); the just-set session cookie isn't on req yet.

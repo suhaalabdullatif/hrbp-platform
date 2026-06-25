@@ -94,7 +94,7 @@ export default function UsersList() {
                         <TableCell>
                           <Badge variant="outline" className="font-mono text-xs">{user.role}</Badge>
                         </TableCell>
-                        <TableCell>{user.businessUnitName || "Global"}</TableCell>
+                        <TableCell>{user.businessUnits.length > 0 ? user.businessUnits.map((b) => b.name).join(", ") : "Global"}</TableCell>
                         <TableCell>
                           {user.isActive ? (
                             <Badge variant="default" className="bg-green-600">Active</Badge>

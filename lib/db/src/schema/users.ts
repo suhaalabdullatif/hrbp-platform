@@ -3,22 +3,20 @@ import {
   serial,
   text,
   boolean,
-  integer,
   timestamp,
 } from "drizzle-orm/pg-core";
-import { businessUnitsTable } from "./businessUnits";
 
 export const userRoles = ["HRBP", "HR_DIRECTOR", "CHRO", "ADMIN"] as const;
 export type UserRole = (typeof userRoles)[number];
 
+// A user's business-unit scope is derived entirely from the
+// `user_business_units` junction table (see ./userBusinessUnits.ts). There is
+// deliberately no business_unit column here.
 export const usersTable = pgTable("users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
   displayName: text("display_name").notNull(),
   role: text("role").notNull(),
-  businessUnitId: integer("business_unit_id").references(
-    () => businessUnitsTable.id,
-  ),
   // Seam for Microsoft Entra ID SSO; null for dev personas.
   entraObjectId: text("entra_object_id").unique(),
   isActive: boolean("is_active").notNull().default(true),

@@ -1,4 +1,4 @@
-import { eq, and, type SQL } from "drizzle-orm";
+import { eq, and, inArray, type SQL } from "drizzle-orm";
 import {
   db,
   employeesTable,
@@ -25,14 +25,16 @@ function ymd(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
-function buFilter<T extends { businessUnitId: unknown }>(
-  column: T["businessUnitId"],
-  buId: number | null,
+// `buIds == null` means no business-unit restriction (global scope). An empty
+// array would match nothing, so callers must pass null for "all".
+function buFilter(
+  column: Parameters<typeof inArray>[0],
+  buIds: number[] | null,
 ): SQL | undefined {
-  return buId == null ? undefined : eq(column as never, buId);
+  return buIds == null ? undefined : inArray(column, buIds);
 }
 
-export async function computeKpis(buId: number | null): Promise<Kpis> {
+export async function computeKpis(buIds: number[] | null): Promise<Kpis> {
   const employees = await db
     .select({
       isSaudi: employeesTable.isSaudi,
@@ -40,7 +42,7 @@ export async function computeKpis(buId: number | null): Promise<Kpis> {
       status: employeesTable.employmentStatus,
     })
     .from(employeesTable)
-    .where(buFilter(employeesTable.businessUnitId, buId));
+    .where(buFilter(employeesTable.businessUnitId, buIds));
 
   const active = employees.filter((e) => e.status !== "terminated");
   const headcount = active.length;
@@ -53,14 +55,14 @@ export async function computeKpis(buId: number | null): Promise<Kpis> {
     .where(
       and(
         eq(requisitionsTable.status, "open"),
-        buFilter(requisitionsTable.businessUnitId, buId),
+        buFilter(requisitionsTable.businessUnitId, buIds),
       ),
     );
 
   const erRows = await db
     .select({ status: erCasesTable.status })
     .from(erCasesTable)
-    .where(buFilter(erCasesTable.businessUnitId, buId));
+    .where(buFilter(erCasesTable.businessUnitId, buIds));
   const openEr = erRows.filter(
     (e) => e.status === "open" || e.status === "in_progress",
   ).length;
@@ -71,7 +73,7 @@ export async function computeKpis(buId: number | null): Promise<Kpis> {
   const exits = await db
     .select({ exitDate: attritionTable.exitDate })
     .from(attritionTable)
-    .where(buFilter(attritionTable.businessUnitId, buId));
+    .where(buFilter(attritionTable.businessUnitId, buIds));
   const recentExits = exits.filter((e) => e.exitDate >= cutoffStr).length;
 
   return {
@@ -90,19 +92,21 @@ export interface TrendPoint {
   exits: number;
 }
 
-export async function computeTrends(buId: number | null): Promise<TrendPoint[]> {
+export async function computeTrends(
+  buIds: number[] | null,
+): Promise<TrendPoint[]> {
   const employees = await db
     .select({
       hireDate: employeesTable.hireDate,
       terminationDate: employeesTable.terminationDate,
     })
     .from(employeesTable)
-    .where(buFilter(employeesTable.businessUnitId, buId));
+    .where(buFilter(employeesTable.businessUnitId, buIds));
 
   const exits = await db
     .select({ exitDate: attritionTable.exitDate })
     .from(attritionTable)
-    .where(buFilter(attritionTable.businessUnitId, buId));
+    .where(buFilter(attritionTable.businessUnitId, buIds));
 
   const points: TrendPoint[] = [];
   const now = new Date();

@@ -5,14 +5,12 @@
  * Enterprise HRBP Platform API
  * OpenAPI spec version: 0.1.0
  */
+import type { BusinessUnitRef } from './businessUnitRef';
 
 export interface AuthUser {
   id: number;
   email: string;
   displayName: string;
   role: string;
-  /** @nullable */
-  businessUnitId?: number | null;
-  /** @nullable */
-  businessUnitName?: string | null;
+  businessUnits: BusinessUnitRef[];
 }

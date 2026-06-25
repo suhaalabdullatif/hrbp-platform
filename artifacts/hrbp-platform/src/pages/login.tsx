@@ -94,7 +94,7 @@ export default function Login() {
                   <p className="font-semibold text-foreground truncate">{persona.label}</p>
                   <p className="text-sm text-muted-foreground truncate">
                     <span className="font-medium text-foreground">{persona.role}</span>
-                    {persona.businessUnitName && ` \u2022 ${persona.businessUnitName}`}
+                    {persona.businessUnitNames.length > 0 && ` \u2022 ${persona.businessUnitNames.join(', ')}`}
                   </p>
                 </div>
                 <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />

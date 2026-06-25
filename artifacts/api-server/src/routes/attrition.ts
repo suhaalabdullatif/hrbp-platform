@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq, and, desc, type SQL } from "drizzle-orm";
+import { eq, and, desc, inArray, type SQL } from "drizzle-orm";
 import {
   db,
   attritionTable,
@@ -15,7 +15,11 @@ import {
   DeleteAttritionParams,
 } from "@workspace/api-zod";
 import { requireAuth } from "../middlewares/auth";
-import { getScope, resolveBusinessUnitFilter } from "../lib/auth/scope";
+import {
+  getScope,
+  resolveBusinessUnitFilter,
+  isInScope,
+} from "../lib/auth/scope";
 import { writeAudit } from "../lib/audit";
 import { iso } from "../lib/serialize";
 
@@ -68,7 +72,8 @@ router.get("/attrition", requireAuth, async (req, res): Promise<void> => {
   }
 
   const conds: SQL[] = [];
-  if (filter !== "all") conds.push(eq(attritionTable.businessUnitId, filter));
+  if (filter !== "all")
+    conds.push(inArray(attritionTable.businessUnitId, filter));
 
   const rows = await db
     .select({
@@ -100,7 +105,7 @@ router.post("/attrition", requireAuth, async (req, res): Promise<void> => {
   }
 
   const scope = getScope(req.auth!);
-  if (!scope.canSeeAll && parsed.data.businessUnitId !== scope.businessUnitId) {
+  if (!isInScope(scope, parsed.data.businessUnitId)) {
     res.status(403).json({ error: "Cannot create outside your business unit" });
     return;
   }
@@ -150,10 +155,7 @@ router.get("/attrition/:id", requireAuth, async (req, res): Promise<void> => {
 
   const row = await loadOne(params.data.id);
   const scope = getScope(req.auth!);
-  if (
-    !row ||
-    (!scope.canSeeAll && row.r.businessUnitId !== scope.businessUnitId)
-  ) {
+  if (!row || !isInScope(scope, row.r.businessUnitId)) {
     res.status(404).json({ error: "Attrition record not found" });
     return;
   }
@@ -174,10 +176,7 @@ router.delete("/attrition/:id", requireAuth, async (req, res): Promise<void> => 
 
   const existing = await loadOne(params.data.id);
   const scope = getScope(req.auth!);
-  if (
-    !existing ||
-    (!scope.canSeeAll && existing.r.businessUnitId !== scope.businessUnitId)
-  ) {
+  if (!existing || !isInScope(scope, existing.r.businessUnitId)) {
     res.status(404).json({ error: "Attrition record not found" });
     return;
   }

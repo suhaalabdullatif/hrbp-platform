@@ -17,12 +17,16 @@ export interface Persona {
   key: string;
   label: string;
   role: string;
-  /** @nullable */
-  businessUnitName?: string | null;
+  businessUnitNames: string[];
 }
 
 export interface LoginInput {
   persona: string;
+}
+
+export interface BusinessUnitRef {
+  id: number;
+  name: string;
 }
 
 export interface AuthUser {
@@ -30,10 +34,7 @@ export interface AuthUser {
   email: string;
   displayName: string;
   role: string;
-  /** @nullable */
-  businessUnitId?: number | null;
-  /** @nullable */
-  businessUnitName?: string | null;
+  businessUnits: BusinessUnitRef[];
 }
 
 export interface BusinessUnit {
@@ -464,10 +465,8 @@ export interface User {
   email: string;
   displayName: string;
   role: UserRole;
-  /** @nullable */
-  businessUnitId?: number | null;
-  /** @nullable */
-  businessUnitName?: string | null;
+  businessUnits: BusinessUnitRef[];
+  businessUnitIds: number[];
   /** @nullable */
   entraObjectId?: string | null;
   isActive: boolean;
@@ -491,8 +490,7 @@ export interface UserInput {
   /** @minLength 1 */
   displayName: string;
   role: UserInputRole;
-  /** @nullable */
-  businessUnitId?: number | null;
+  businessUnitIds?: number[];
   isActive?: boolean;
 }
 
@@ -512,8 +510,7 @@ export interface UserUpdate {
   /** @minLength 1 */
   displayName?: string;
   role?: UserUpdateRole;
-  /** @nullable */
-  businessUnitId?: number | null;
+  businessUnitIds?: number[];
   isActive?: boolean;
 }
 

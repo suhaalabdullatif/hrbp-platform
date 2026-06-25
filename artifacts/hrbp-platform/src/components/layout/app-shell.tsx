@@ -173,7 +173,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">{user.displayName}</p>
                   <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-                  <p className="text-xs leading-none text-muted-foreground mt-1">Scope: {user.businessUnitName || 'Global'}</p>
+                  <p className="text-xs leading-none text-muted-foreground mt-1">Scope: {user.businessUnits.length > 0 ? user.businessUnits.map((b) => b.name).join(', ') : 'Global'}</p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />

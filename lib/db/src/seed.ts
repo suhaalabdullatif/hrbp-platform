@@ -1,6 +1,7 @@
 import { pool, db } from "./index";
 import { businessUnitsTable } from "./schema/businessUnits";
 import { usersTable } from "./schema/users";
+import { userBusinessUnitsTable } from "./schema/userBusinessUnits";
 import { employeesTable } from "./schema/employees";
 import { requisitionsTable } from "./schema/requisitions";
 import { erCasesTable } from "./schema/erCases";
@@ -125,6 +126,7 @@ async function main() {
   await db.delete(erCasesTable);
   await db.delete(requisitionsTable);
   await db.delete(employeesTable);
+  await db.delete(userBusinessUnitsTable);
   await db.delete(usersTable);
   await db.delete(businessUnitsTable);
 
@@ -138,38 +140,56 @@ async function main() {
   const buMeta = new Map(BUSINESS_UNITS.map((b) => [b.code, b]));
 
   console.log("Seeding persona users...");
-  await db.insert(usersTable).values([
-    {
-      email: "hrbp.ai@humain.example",
-      displayName: "Layla Al-Rashid",
-      role: "HRBP",
-      businessUnitId: buByCode.get("HUM_INT")!.id,
-    },
-    {
-      email: "hrbp.tech@humain.example",
-      displayName: "Omar Al-Farsi",
-      role: "HRBP",
-      businessUnitId: buByCode.get("TECH")!.id,
-    },
-    {
-      email: "hrbp.corp@humain.example",
-      displayName: "Noura Al-Qahtani",
-      role: "HRBP",
-      businessUnitId: buByCode.get("HR")!.id,
-    },
-    {
-      email: "chro@humain.example",
-      displayName: "Faisal Al-Otaibi",
-      role: "CHRO",
-      businessUnitId: null,
-    },
-    {
-      email: "admin@humain.example",
-      displayName: "System Administrator",
-      role: "ADMIN",
-      businessUnitId: null,
-    },
-  ]);
+  // Business-unit scope for HRBPs lives in the user_business_units junction.
+  // This demonstrates the many-to-many relationship: HRBP_AI and HRBP_TECH each
+  // cover multiple units, and Information Security (INFOSEC) is shared by both —
+  // so a single HRBP can span many BUs and a single BU can have many HRBPs.
+  const userAssignments: { email: string; buCodes: string[] }[] = [
+    { email: "hrbp.ai@humain.example", buCodes: ["HUM_INT", "INFOSEC"] },
+    { email: "hrbp.tech@humain.example", buCodes: ["TECH", "INFOSEC"] },
+    { email: "hrbp.corp@humain.example", buCodes: ["HR"] },
+  ];
+
+  const insertedUsers = await db
+    .insert(usersTable)
+    .values([
+      {
+        email: "hrbp.ai@humain.example",
+        displayName: "Layla Al-Rashid",
+        role: "HRBP",
+      },
+      {
+        email: "hrbp.tech@humain.example",
+        displayName: "Omar Al-Farsi",
+        role: "HRBP",
+      },
+      {
+        email: "hrbp.corp@humain.example",
+        displayName: "Noura Al-Qahtani",
+        role: "HRBP",
+      },
+      {
+        email: "chro@humain.example",
+        displayName: "Faisal Al-Otaibi",
+        role: "CHRO",
+      },
+      {
+        email: "admin@humain.example",
+        displayName: "System Administrator",
+        role: "ADMIN",
+      },
+    ])
+    .returning();
+
+  const userByEmail = new Map(insertedUsers.map((u) => [u.email, u]));
+  const assignmentRows = userAssignments.flatMap(({ email, buCodes }) =>
+    buCodes.map((code) => ({
+      userId: userByEmail.get(email)!.id,
+      businessUnitId: buByCode.get(code)!.id,
+    })),
+  );
+  await db.insert(userBusinessUnitsTable).values(assignmentRows);
+  console.log(`  ${assignmentRows.length} user-business-unit assignments`);
 
   console.log("Seeding employees...");
   type EmpInsert = typeof employeesTable.$inferInsert;

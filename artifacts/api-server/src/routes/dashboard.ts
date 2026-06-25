@@ -37,8 +37,8 @@ router.get("/dashboard/kpis", requireAuth, async (req, res): Promise<void> => {
     return;
   }
 
-  const buId = filter === "all" ? null : filter;
-  res.json(GetDashboardKpisResponse.parse(await computeKpis(buId)));
+  const buIds = filter === "all" ? null : filter;
+  res.json(GetDashboardKpisResponse.parse(await computeKpis(buIds)));
 });
 
 router.get(
@@ -55,7 +55,7 @@ router.get(
       units.map(async (bu) => ({
         businessUnitId: bu.id,
         businessUnitName: bu.name,
-        ...(await computeKpis(bu.id)),
+        ...(await computeKpis([bu.id])),
       })),
     );
 
@@ -77,8 +77,8 @@ router.get("/dashboard/trends", requireAuth, async (req, res): Promise<void> => 
     return;
   }
 
-  const buId = filter === "all" ? null : filter;
-  res.json(GetDashboardTrendsResponse.parse(await computeTrends(buId)));
+  const buIds = filter === "all" ? null : filter;
+  res.json(GetDashboardTrendsResponse.parse(await computeTrends(buIds)));
 });
 
 export default router;

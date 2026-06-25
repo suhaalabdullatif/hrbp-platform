@@ -3,8 +3,10 @@ name: Business-unit isolation for scoped roles
 description: Authorization rules that are easy to miss when enforcing row-level BU isolation
 ---
 
-HRBP users are scoped to one business unit; HR_DIRECTOR/CHRO/ADMIN are global
-(`GLOBAL_ROLES` in `lib/auth/scope.ts`).
+HRBP users are scoped to a *set* of business units via the `user_business_units`
+junction (many-to-many); HR_DIRECTOR/CHRO/ADMIN are global with empty assignments
+and see all. All scoped reads/writes filter on the assigned BU-id set (union for
+multi-BU HRBPs), never a single column.
 
 Checking the *existing* record's BU on PATCH is not enough. Two extra rules:
 

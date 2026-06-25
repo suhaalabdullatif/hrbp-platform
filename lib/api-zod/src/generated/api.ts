@@ -24,7 +24,7 @@ export const ListPersonasResponseItem = zod.object({
   "key": zod.string(),
   "label": zod.string(),
   "role": zod.string(),
-  "businessUnitName": zod.string().nullish()
+  "businessUnitNames": zod.array(zod.string())
 })
 export const ListPersonasResponse = zod.array(ListPersonasResponseItem)
 
@@ -41,8 +41,10 @@ export const LoginResponse = zod.object({
   "email": zod.string(),
   "displayName": zod.string(),
   "role": zod.string(),
-  "businessUnitId": zod.number().nullish(),
-  "businessUnitName": zod.string().nullish()
+  "businessUnits": zod.array(zod.object({
+  "id": zod.number(),
+  "name": zod.string()
+}))
 })
 
 
@@ -60,8 +62,10 @@ export const GetCurrentUserResponse = zod.object({
   "email": zod.string(),
   "displayName": zod.string(),
   "role": zod.string(),
-  "businessUnitId": zod.number().nullish(),
-  "businessUnitName": zod.string().nullish()
+  "businessUnits": zod.array(zod.object({
+  "id": zod.number(),
+  "name": zod.string()
+}))
 })
 
 
@@ -962,8 +966,11 @@ export const ListUsersResponseItem = zod.object({
   "email": zod.string(),
   "displayName": zod.string(),
   "role": zod.enum(['HRBP', 'HR_DIRECTOR', 'CHRO', 'ADMIN']),
-  "businessUnitId": zod.number().nullish(),
-  "businessUnitName": zod.string().nullish(),
+  "businessUnits": zod.array(zod.object({
+  "id": zod.number(),
+  "name": zod.string()
+})),
+  "businessUnitIds": zod.array(zod.number()),
   "entraObjectId": zod.string().nullish(),
   "isActive": zod.boolean(),
   "createdAt": zod.string(),
@@ -983,7 +990,7 @@ export const CreateUserBody = zod.object({
   "email": zod.string().min(1),
   "displayName": zod.string().min(1),
   "role": zod.enum(['HRBP', 'HR_DIRECTOR', 'CHRO', 'ADMIN']),
-  "businessUnitId": zod.number().nullish(),
+  "businessUnitIds": zod.array(zod.number()).optional(),
   "isActive": zod.boolean().optional()
 })
 
@@ -992,8 +999,11 @@ export const CreateUserResponse = zod.object({
   "email": zod.string(),
   "displayName": zod.string(),
   "role": zod.enum(['HRBP', 'HR_DIRECTOR', 'CHRO', 'ADMIN']),
-  "businessUnitId": zod.number().nullish(),
-  "businessUnitName": zod.string().nullish(),
+  "businessUnits": zod.array(zod.object({
+  "id": zod.number(),
+  "name": zod.string()
+})),
+  "businessUnitIds": zod.array(zod.number()),
   "entraObjectId": zod.string().nullish(),
   "isActive": zod.boolean(),
   "createdAt": zod.string(),
@@ -1013,8 +1023,11 @@ export const GetUserResponse = zod.object({
   "email": zod.string(),
   "displayName": zod.string(),
   "role": zod.enum(['HRBP', 'HR_DIRECTOR', 'CHRO', 'ADMIN']),
-  "businessUnitId": zod.number().nullish(),
-  "businessUnitName": zod.string().nullish(),
+  "businessUnits": zod.array(zod.object({
+  "id": zod.number(),
+  "name": zod.string()
+})),
+  "businessUnitIds": zod.array(zod.number()),
   "entraObjectId": zod.string().nullish(),
   "isActive": zod.boolean(),
   "createdAt": zod.string(),
@@ -1037,7 +1050,7 @@ export const UpdateUserBody = zod.object({
   "email": zod.string().min(1).optional(),
   "displayName": zod.string().min(1).optional(),
   "role": zod.enum(['HRBP', 'HR_DIRECTOR', 'CHRO', 'ADMIN']).optional(),
-  "businessUnitId": zod.number().nullish(),
+  "businessUnitIds": zod.array(zod.number()).optional(),
   "isActive": zod.boolean().optional()
 })
 
@@ -1046,8 +1059,11 @@ export const UpdateUserResponse = zod.object({
   "email": zod.string(),
   "displayName": zod.string(),
   "role": zod.enum(['HRBP', 'HR_DIRECTOR', 'CHRO', 'ADMIN']),
-  "businessUnitId": zod.number().nullish(),
-  "businessUnitName": zod.string().nullish(),
+  "businessUnits": zod.array(zod.object({
+  "id": zod.number(),
+  "name": zod.string()
+})),
+  "businessUnitIds": zod.array(zod.number()),
   "entraObjectId": zod.string().nullish(),
   "isActive": zod.boolean(),
   "createdAt": zod.string(),

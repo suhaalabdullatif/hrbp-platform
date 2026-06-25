@@ -1,5 +1,6 @@
 export * from "./businessUnits";
 export * from "./users";
+export * from "./userBusinessUnits";
 export * from "./employees";
 export * from "./requisitions";
 export * from "./erCases";

@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { asc, eq, and, type SQL } from "drizzle-orm";
+import { asc, eq, and, inArray, type SQL } from "drizzle-orm";
 import {
   db,
   businessUnitsTable,
@@ -47,20 +47,20 @@ router.get("/notifications", requireAuth, async (req, res): Promise<void> => {
     .select()
     .from(businessUnitsTable)
     .where(
-      scope.canSeeAll || scope.businessUnitId == null
+      scope.canSeeAll
         ? undefined
-        : eq(businessUnitsTable.id, scope.businessUnitId),
+        : inArray(businessUnitsTable.id, scope.businessUnitIds),
     )
     .orderBy(asc(businessUnitsTable.name));
 
   const scopedUnits = scope.canSeeAll
     ? units
-    : units.filter((u) => u.id === scope.businessUnitId);
+    : units.filter((u) => scope.businessUnitIds.includes(u.id));
 
   const alerts: Alert[] = [];
 
   for (const bu of scopedUnits) {
-    const kpis = await computeKpis(bu.id);
+    const kpis = await computeKpis([bu.id]);
     if (kpis.headcount > 0 && kpis.saudizationPct < SAUDIZATION_FLOOR) {
       alerts.push({
         id: `saudization-${bu.id}`,
@@ -89,10 +89,9 @@ router.get("/notifications", requireAuth, async (req, res): Promise<void> => {
     }
   }
 
-  const buScopeCond: SQL | undefined =
-    scope.canSeeAll || scope.businessUnitId == null
-      ? undefined
-      : eq(erCasesTable.businessUnitId, scope.businessUnitId);
+  const buScopeCond: SQL | undefined = scope.canSeeAll
+    ? undefined
+    : inArray(erCasesTable.businessUnitId, scope.businessUnitIds);
   const erRows = await db
     .select()
     .from(erCasesTable)
@@ -117,10 +116,9 @@ router.get("/notifications", requireAuth, async (req, res): Promise<void> => {
     }
   }
 
-  const reqScopeCond: SQL | undefined =
-    scope.canSeeAll || scope.businessUnitId == null
-      ? undefined
-      : eq(requisitionsTable.businessUnitId, scope.businessUnitId);
+  const reqScopeCond: SQL | undefined = scope.canSeeAll
+    ? undefined
+    : inArray(requisitionsTable.businessUnitId, scope.businessUnitIds);
   const reqRows = await db
     .select()
     .from(requisitionsTable)
@@ -145,10 +143,9 @@ router.get("/notifications", requireAuth, async (req, res): Promise<void> => {
     }
   }
 
-  const probScopeCond: SQL | undefined =
-    scope.canSeeAll || scope.businessUnitId == null
-      ? undefined
-      : eq(probationTable.businessUnitId, scope.businessUnitId);
+  const probScopeCond: SQL | undefined = scope.canSeeAll
+    ? undefined
+    : inArray(probationTable.businessUnitId, scope.businessUnitIds);
   const probRows = await db
     .select()
     .from(probationTable)

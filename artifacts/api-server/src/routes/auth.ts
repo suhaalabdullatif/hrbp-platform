@@ -8,7 +8,7 @@ import {
 } from "@workspace/api-zod";
 import { PERSONAS, getPersona } from "../lib/auth/personas";
 import { encodeSession, SESSION_COOKIE } from "../lib/auth/session";
-import { authProvider } from "../lib/auth/provider";
+import { authProvider, toAuthenticatedUser } from "../lib/auth/provider";
 
 const router: IRouter = Router();
 
@@ -19,7 +19,7 @@ router.get("/auth/personas", async (_req, res): Promise<void> => {
     key: p.key,
     label: p.label,
     role: p.role,
-    businessUnitName: p.businessUnitName,
+    businessUnitNames: p.businessUnitNames,
   }));
   res.json(ListPersonasResponse.parse(personas));
 });
@@ -55,8 +55,8 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     maxAge: 1000 * 60 * 60 * 24 * 7,
   });
 
-  const current = await authProvider.getCurrentUser(req);
-  res.json(GetCurrentUserResponse.parse(current ?? user));
+  const current = await toAuthenticatedUser(user);
+  res.json(GetCurrentUserResponse.parse(current));
 });
 
 router.post("/auth/logout", async (_req, res): Promise<void> => {

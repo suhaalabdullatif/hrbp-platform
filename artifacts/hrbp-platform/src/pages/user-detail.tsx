@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useForm, Controller } from "react-hook-form";
@@ -27,7 +28,7 @@ const formSchema = z.object({
   email: z.string().email("Invalid email").min(1, "Required"),
   displayName: z.string().min(1, "Required"),
   role: z.enum(["HRBP", "HR_DIRECTOR", "CHRO", "ADMIN"]),
-  businessUnitId: z.coerce.number().optional().nullable(),
+  businessUnitIds: z.array(z.number()),
   isActive: z.boolean().optional(),
 });
 
@@ -54,7 +55,7 @@ export default function UserDetail() {
       email: "",
       displayName: "",
       role: "HRBP" as UserInputRole,
-      businessUnitId: null as number | null,
+      businessUnitIds: [] as number[],
       isActive: true,
     }
   });
@@ -65,7 +66,7 @@ export default function UserDetail() {
         email: user.email,
         displayName: user.displayName,
         role: user.role as any,
-        businessUnitId: user.businessUnitId,
+        businessUnitIds: user.businessUnitIds ?? [],
         isActive: user.isActive,
       });
     }
@@ -73,7 +74,6 @@ export default function UserDetail() {
 
   const onSubmit = (data: any) => {
     const payload = { ...data };
-    if (!payload.businessUnitId) payload.businessUnitId = null;
 
     if (isNew) {
       createUser.mutate(
@@ -168,23 +168,35 @@ export default function UserDetail() {
                   )}
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Business Unit (Optional)</Label>
+              <div className="space-y-2 col-span-2">
+                <Label>Business Units</Label>
+                <p className="text-xs text-muted-foreground">
+                  Assign one or more business units. Leave empty for global roles (HR Director, CHRO, Admin) that see all units.
+                </p>
                 <Controller
-                  name="businessUnitId"
+                  name="businessUnitIds"
                   control={control}
                   render={({ field }) => (
-                    <Select value={field.value ? field.value.toString() : "none"} onValueChange={(val) => field.onChange(val === "none" ? null : parseInt(val))}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Global" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Global (All BUs)</SelectItem>
-                        {businessUnits?.map((bu) => (
-                          <SelectItem key={bu.id} value={bu.id.toString()}>{bu.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="grid grid-cols-2 gap-2 rounded-md border p-3">
+                      {businessUnits?.map((bu) => {
+                        const checked = field.value.includes(bu.id);
+                        return (
+                          <label key={bu.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                            <Checkbox
+                              checked={checked}
+                              onCheckedChange={(val) => {
+                                if (val) {
+                                  field.onChange([...field.value, bu.id]);
+                                } else {
+                                  field.onChange(field.value.filter((id) => id !== bu.id));
+                                }
+                              }}
+                            />
+                            <span className="truncate">{bu.name}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
                   )}
                 />
               </div>

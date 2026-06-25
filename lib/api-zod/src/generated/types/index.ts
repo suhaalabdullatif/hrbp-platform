@@ -21,6 +21,7 @@ export * from './businessUnit';
 export * from './businessUnitContext';
 export * from './businessUnitContextRisk';
 export * from './businessUnitFacts';
+export * from './businessUnitRef';
 export * from './comparisonRow';
 export * from './contextRiskItem';
 export * from './employee';

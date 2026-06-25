@@ -6,9 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface Persona {
-  key: string;
-  label: string;
-  role: string;
-  businessUnitNames: string[];
+export interface BusinessUnitRef {
+  id: number;
+  name: string;
 }

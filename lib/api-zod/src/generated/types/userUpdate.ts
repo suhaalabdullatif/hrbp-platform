@@ -13,7 +13,6 @@ export interface UserUpdate {
   /** @minLength 1 */
   displayName?: string;
   role?: UserUpdateRole;
-  /** @nullable */
-  businessUnitId?: number | null;
+  businessUnitIds?: number[];
   isActive?: boolean;
 }

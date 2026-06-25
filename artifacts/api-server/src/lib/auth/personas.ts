@@ -1,18 +1,17 @@
 import type { UserRole } from "@workspace/db";
 
 // Dev personas. TEMPORARY until Microsoft Entra ID SSO is wired in.
-// Each persona maps to a seeded user (matched by email). The `businessUnitCode`
-// links a scoped persona to a specific business unit; null means global scope.
+// Each persona maps to a seeded user (matched by email). Business-unit scope is
+// resolved at runtime from the user_business_units junction; the names below are
+// for display only and mirror the seeded assignments.
 export interface PersonaDef {
   key: string;
   label: string;
   role: UserRole;
   email: string;
   displayName: string;
-  // Business unit name used for display + seed matching; null for global roles.
-  businessUnitName: string | null;
-  // Business unit code used to resolve businessUnitId during seeding/login.
-  businessUnitCode: string | null;
+  // Business unit names used for display; empty for global roles.
+  businessUnitNames: string[];
 }
 
 export const PERSONAS: PersonaDef[] = [
@@ -22,8 +21,7 @@ export const PERSONAS: PersonaDef[] = [
     role: "HRBP",
     email: "hrbp.ai@humain.example",
     displayName: "Layla Al-Rashid",
-    businessUnitName: "HUMAIN Intelligence",
-    businessUnitCode: "HUM_INT",
+    businessUnitNames: ["HUMAIN Intelligence", "Information Security"],
   },
   {
     key: "HRBP_TECH",
@@ -31,8 +29,7 @@ export const PERSONAS: PersonaDef[] = [
     role: "HRBP",
     email: "hrbp.tech@humain.example",
     displayName: "Omar Al-Farsi",
-    businessUnitName: "Technology",
-    businessUnitCode: "TECH",
+    businessUnitNames: ["Technology", "Information Security"],
   },
   {
     key: "HRBP_CORPORATE",
@@ -40,8 +37,7 @@ export const PERSONAS: PersonaDef[] = [
     role: "HRBP",
     email: "hrbp.corp@humain.example",
     displayName: "Noura Al-Qahtani",
-    businessUnitName: "Human Resources",
-    businessUnitCode: "HR",
+    businessUnitNames: ["Human Resources"],
   },
   {
     key: "CHRO",
@@ -49,8 +45,7 @@ export const PERSONAS: PersonaDef[] = [
     role: "CHRO",
     email: "chro@humain.example",
     displayName: "Faisal Al-Otaibi",
-    businessUnitName: null,
-    businessUnitCode: null,
+    businessUnitNames: [],
   },
   {
     key: "ADMIN",
@@ -58,8 +53,7 @@ export const PERSONAS: PersonaDef[] = [
     role: "ADMIN",
     email: "admin@humain.example",
     displayName: "System Administrator",
-    businessUnitName: null,
-    businessUnitCode: null,
+    businessUnitNames: [],
   },
 ];
 

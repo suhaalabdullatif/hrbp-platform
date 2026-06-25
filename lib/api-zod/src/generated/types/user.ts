@@ -5,6 +5,7 @@
  * Enterprise HRBP Platform API
  * OpenAPI spec version: 0.1.0
  */
+import type { BusinessUnitRef } from './businessUnitRef';
 import type { UserRole } from './userRole';
 
 export interface User {
@@ -12,10 +13,8 @@ export interface User {
   email: string;
   displayName: string;
   role: UserRole;
-  /** @nullable */
-  businessUnitId?: number | null;
-  /** @nullable */
-  businessUnitName?: string | null;
+  businessUnits: BusinessUnitRef[];
+  businessUnitIds: number[];
   /** @nullable */
   entraObjectId?: string | null;
   isActive: boolean;

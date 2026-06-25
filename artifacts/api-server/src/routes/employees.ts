@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq, and, asc, ilike, or, type SQL } from "drizzle-orm";
+import { eq, and, asc, ilike, or, inArray, type SQL } from "drizzle-orm";
 import { db, employeesTable, businessUnitsTable } from "@workspace/db";
 import {
   ListEmployeesQueryParams,
@@ -12,7 +12,11 @@ import {
   DeleteEmployeeParams,
 } from "@workspace/api-zod";
 import { requireAuth } from "../middlewares/auth";
-import { getScope, resolveBusinessUnitFilter } from "../lib/auth/scope";
+import {
+  getScope,
+  resolveBusinessUnitFilter,
+  isInScope,
+} from "../lib/auth/scope";
 import { writeAudit } from "../lib/audit";
 import { iso } from "../lib/serialize";
 
@@ -56,7 +60,8 @@ router.get("/employees", requireAuth, async (req, res): Promise<void> => {
   }
 
   const conds: SQL[] = [];
-  if (filter !== "all") conds.push(eq(employeesTable.businessUnitId, filter));
+  if (filter !== "all")
+    conds.push(inArray(employeesTable.businessUnitId, filter));
   if (query.data.status)
     conds.push(eq(employeesTable.employmentStatus, query.data.status));
   if (query.data.search) {
@@ -95,7 +100,7 @@ router.post("/employees", requireAuth, async (req, res): Promise<void> => {
   }
 
   const scope = getScope(req.auth!);
-  if (!scope.canSeeAll && parsed.data.businessUnitId !== scope.businessUnitId) {
+  if (!isInScope(scope, parsed.data.businessUnitId)) {
     res.status(403).json({ error: "Cannot create outside your business unit" });
     return;
   }
@@ -128,10 +133,7 @@ router.get("/employees/:id", requireAuth, async (req, res): Promise<void> => {
 
   const row = await loadEmployee(params.data.id);
   const scope = getScope(req.auth!);
-  if (
-    !row ||
-    (!scope.canSeeAll && row.e.businessUnitId !== scope.businessUnitId)
-  ) {
+  if (!row || !isInScope(scope, row.e.businessUnitId)) {
     res.status(404).json({ error: "Employee not found" });
     return;
   }
@@ -153,18 +155,14 @@ router.patch("/employees/:id", requireAuth, async (req, res): Promise<void> => {
 
   const existing = await loadEmployee(params.data.id);
   const scope = getScope(req.auth!);
-  if (
-    !existing ||
-    (!scope.canSeeAll && existing.e.businessUnitId !== scope.businessUnitId)
-  ) {
+  if (!existing || !isInScope(scope, existing.e.businessUnitId)) {
     res.status(404).json({ error: "Employee not found" });
     return;
   }
 
   if (
-    !scope.canSeeAll &&
     parsed.data.businessUnitId != null &&
-    parsed.data.businessUnitId !== scope.businessUnitId
+    !isInScope(scope, parsed.data.businessUnitId)
   ) {
     res
       .status(403)
@@ -202,10 +200,7 @@ router.delete(
 
     const existing = await loadEmployee(params.data.id);
     const scope = getScope(req.auth!);
-    if (
-      !existing ||
-      (!scope.canSeeAll && existing.e.businessUnitId !== scope.businessUnitId)
-    ) {
+    if (!existing || !isInScope(scope, existing.e.businessUnitId)) {
       res.status(404).json({ error: "Employee not found" });
       return;
     }

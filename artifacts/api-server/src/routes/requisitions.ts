@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq, and, desc, type SQL } from "drizzle-orm";
+import { eq, and, desc, inArray, type SQL } from "drizzle-orm";
 import { db, requisitionsTable, businessUnitsTable } from "@workspace/db";
 import {
   ListRequisitionsQueryParams,
@@ -12,7 +12,11 @@ import {
   DeleteRequisitionParams,
 } from "@workspace/api-zod";
 import { requireAuth } from "../middlewares/auth";
-import { getScope, resolveBusinessUnitFilter } from "../lib/auth/scope";
+import {
+  getScope,
+  resolveBusinessUnitFilter,
+  isInScope,
+} from "../lib/auth/scope";
 import { writeAudit } from "../lib/audit";
 import { iso } from "../lib/serialize";
 
@@ -57,7 +61,7 @@ router.get("/requisitions", requireAuth, async (req, res): Promise<void> => {
 
   const conds: SQL[] = [];
   if (filter !== "all")
-    conds.push(eq(requisitionsTable.businessUnitId, filter));
+    conds.push(inArray(requisitionsTable.businessUnitId, filter));
   if (query.data.status)
     conds.push(eq(requisitionsTable.status, query.data.status));
 
@@ -86,7 +90,7 @@ router.post("/requisitions", requireAuth, async (req, res): Promise<void> => {
   }
 
   const scope = getScope(req.auth!);
-  if (!scope.canSeeAll && parsed.data.businessUnitId !== scope.businessUnitId) {
+  if (!isInScope(scope, parsed.data.businessUnitId)) {
     res.status(403).json({ error: "Cannot create outside your business unit" });
     return;
   }
@@ -119,10 +123,7 @@ router.get("/requisitions/:id", requireAuth, async (req, res): Promise<void> => 
 
   const row = await loadOne(params.data.id);
   const scope = getScope(req.auth!);
-  if (
-    !row ||
-    (!scope.canSeeAll && row.r.businessUnitId !== scope.businessUnitId)
-  ) {
+  if (!row || !isInScope(scope, row.r.businessUnitId)) {
     res.status(404).json({ error: "Requisition not found" });
     return;
   }
@@ -147,18 +148,14 @@ router.patch(
 
     const existing = await loadOne(params.data.id);
     const scope = getScope(req.auth!);
-    if (
-      !existing ||
-      (!scope.canSeeAll && existing.r.businessUnitId !== scope.businessUnitId)
-    ) {
+    if (!existing || !isInScope(scope, existing.r.businessUnitId)) {
       res.status(404).json({ error: "Requisition not found" });
       return;
     }
 
     if (
-      !scope.canSeeAll &&
       parsed.data.businessUnitId != null &&
-      parsed.data.businessUnitId !== scope.businessUnitId
+      !isInScope(scope, parsed.data.businessUnitId)
     ) {
       res
         .status(403)
@@ -197,10 +194,7 @@ router.delete(
 
     const existing = await loadOne(params.data.id);
     const scope = getScope(req.auth!);
-    if (
-      !existing ||
-      (!scope.canSeeAll && existing.r.businessUnitId !== scope.businessUnitId)
-    ) {
+    if (!existing || !isInScope(scope, existing.r.businessUnitId)) {
       res.status(404).json({ error: "Requisition not found" });
       return;
     }

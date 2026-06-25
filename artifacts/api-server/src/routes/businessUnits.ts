@@ -20,11 +20,11 @@ router.get(
         .select()
         .from(businessUnitsTable)
         .orderBy(asc(businessUnitsTable.name));
-    } else if (scope.businessUnitId != null) {
+    } else if (scope.businessUnitIds.length > 0) {
       rows = await db
         .select()
         .from(businessUnitsTable)
-        .where(inArray(businessUnitsTable.id, [scope.businessUnitId]))
+        .where(inArray(businessUnitsTable.id, scope.businessUnitIds))
         .orderBy(asc(businessUnitsTable.name));
     } else {
       rows = [];

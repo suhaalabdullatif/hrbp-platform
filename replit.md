@@ -41,8 +41,9 @@ A workforce-intelligence platform for HR Business Partners and executives at HUM
 
 ## Architecture decisions
 
-- **Pluggable auth seam.** `lib/auth/provider.ts` defines an `AuthProvider` interface. The current `DevPersonaProvider` reads a signed cookie encoding a seeded user id (dev persona login). A future Microsoft Entra ID provider implements the same interface, resolving users via the `users.entra_object_id` column (already present). Personas live in `lib/auth/personas.ts`.
-- **Centralized authorization.** `middlewares/auth.ts` exposes `populateAuth` (optional), `requireAuth`, and `requireRole(...)`. `lib/auth/scope.ts` resolves business-unit visibility: `GLOBAL_ROLES` (HR_DIRECTOR, CHRO, ADMIN) see all units; HRBP is restricted to their own BU.
+- **Pluggable auth seam.** `lib/auth/provider.ts` defines an `AuthProvider` interface. The current `DevPersonaProvider` reads a signed cookie encoding a seeded user id (dev persona login). A future Microsoft Entra ID provider implements the same interface, resolving users via the `users.entra_object_id` column (already present). Personas live in `lib/auth/personas.ts`. The authenticated user carries `businessUnits: {id,name}[]` loaded from the `user_business_units` junction; `/auth/login` builds the returned AuthUser directly from the user row (`toAuthenticatedUser`) because the just-set session cookie is not yet on the request.
+- **Many-to-many BU assignments.** Users are assigned to business units via the `user_business_units` junction table (composite PK `(userId, businessUnitId)`) — there is no single `businessUnitId` column on `users`. All scoping derives from the assigned id set.
+- **Centralized authorization.** `middlewares/auth.ts` exposes `populateAuth` (optional), `requireAuth`, and `requireRole(...)`. `lib/auth/scope.ts` resolves business-unit visibility: `GLOBAL_ROLES` (HR_DIRECTOR, CHRO, ADMIN) have empty assignments and see all units; HRBP sees the union of its assigned BUs (`resolveBusinessUnitFilter` returns a `number[]` used with `inArray`). Admin user management edits assignments (delete+insert junction rows, deduped) and returns `businessUnits[]` + `businessUnitIds[]`.
 - **App-layer row isolation.** Scoping is enforced in queries (list filters + per-record 404 on out-of-scope access), not Postgres RLS.
 - **Audit logging.** Every mutation calls `writeAudit`; failures never break the primary operation. Audit log is ADMIN-only.
 - **Rule-based alerts.** `routes/notifications.ts` computes alerts on the fly (low Saudization, high attrition, open high-severity ER cases, aging requisitions, probations ending soon) — no stored notifications table.
@@ -53,7 +54,7 @@ A workforce-intelligence platform for HR Business Partners and executives at HUM
 ## Product
 
 - Persona login (dev): HRBP for HUMAIN Intelligence / Technology / Human Resources, plus global CHRO and ADMIN.
-- Six KPIs: Headcount, Saudization %, Female %, Open Roles, Attrition %, Open ER Cases — scoped to the viewer's business unit (global for CHRO/HR_DIRECTOR/ADMIN).
+- Six KPIs: Headcount, Saudization %, Female %, Open Roles, Attrition %, Open ER Cases — scoped to the union of the viewer's assigned business units (global for CHRO/HR_DIRECTOR/ADMIN).
 - CHRO per-business-unit comparison and 12-month headcount/exit trends.
 - Scoped CRUD for employees, requisitions, ER cases, attrition (no update), and probation.
 - ADMIN-only user management and audit log.
