@@ -3,13 +3,35 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Enterprise HRBP Platform API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication and session
+  - name: business-units
+    description: Business units
+  - name: employees
+    description: Employee master data
+  - name: requisitions
+    description: Recruitment requisitions
+  - name: er-cases
+    description: Employee relations cases
+  - name: attrition
+    description: Attrition records
+  - name: probation
+    description: Probation tracking
+  - name: dashboard
+    description: Dashboards and KPIs
+  - name: admin
+    description: User and permission management
+  - name: audit
+    description: Audit log
+  - name: notifications
+    description: Alerts and notifications
 paths:
   /healthz:
     get:
@@ -24,7 +46,825 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/personas:
+    get:
+      operationId: listPersonas
+      tags: [auth]
+      summary: List available dev login personas
+      responses:
+        "200":
+          description: Personas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Persona"
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Log in as a dev persona
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "400":
+          description: Invalid persona
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Log out
+      responses:
+        "204":
+          description: Logged out
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Get the current authenticated user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /business-units:
+    get:
+      operationId: listBusinessUnits
+      tags: [business-units]
+      summary: List business units in scope
+      responses:
+        "200":
+          description: Business units
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BusinessUnit"
+
+  /employees:
+    get:
+      operationId: listEmployees
+      tags: [employees]
+      summary: List employees in scope
+      parameters:
+        - name: businessUnitId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Employees
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Employee"
+    post:
+      operationId: createEmployee
+      tags: [employees]
+      summary: Create an employee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employee"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /employees/{id}:
+    get:
+      operationId: getEmployee
+      tags: [employees]
+      summary: Get an employee
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "200":
+          description: Employee
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employee"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    patch:
+      operationId: updateEmployee
+      tags: [employees]
+      summary: Update an employee
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employee"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      operationId: deleteEmployee
+      tags: [employees]
+      summary: Delete an employee
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /requisitions:
+    get:
+      operationId: listRequisitions
+      tags: [requisitions]
+      summary: List requisitions in scope
+      parameters:
+        - name: businessUnitId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Requisitions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Requisition"
+    post:
+      operationId: createRequisition
+      tags: [requisitions]
+      summary: Create a requisition
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequisitionInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Requisition"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /requisitions/{id}:
+    get:
+      operationId: getRequisition
+      tags: [requisitions]
+      summary: Get a requisition
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "200":
+          description: Requisition
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Requisition"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    patch:
+      operationId: updateRequisition
+      tags: [requisitions]
+      summary: Update a requisition
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequisitionUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Requisition"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      operationId: deleteRequisition
+      tags: [requisitions]
+      summary: Delete a requisition
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /er-cases:
+    get:
+      operationId: listErCases
+      tags: [er-cases]
+      summary: List ER cases in scope
+      parameters:
+        - name: businessUnitId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ER cases
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ErCase"
+    post:
+      operationId: createErCase
+      tags: [er-cases]
+      summary: Create an ER case
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ErCaseInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErCase"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /er-cases/{id}:
+    get:
+      operationId: getErCase
+      tags: [er-cases]
+      summary: Get an ER case
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "200":
+          description: ER case
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErCase"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    patch:
+      operationId: updateErCase
+      tags: [er-cases]
+      summary: Update an ER case
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ErCaseUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErCase"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      operationId: deleteErCase
+      tags: [er-cases]
+      summary: Delete an ER case
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /attrition:
+    get:
+      operationId: listAttrition
+      tags: [attrition]
+      summary: List attrition records in scope
+      parameters:
+        - name: businessUnitId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Attrition records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Attrition"
+    post:
+      operationId: createAttrition
+      tags: [attrition]
+      summary: Create an attrition record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AttritionInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Attrition"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /attrition/{id}:
+    get:
+      operationId: getAttrition
+      tags: [attrition]
+      summary: Get an attrition record
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "200":
+          description: Attrition record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Attrition"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      operationId: deleteAttrition
+      tags: [attrition]
+      summary: Delete an attrition record
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /probation:
+    get:
+      operationId: listProbation
+      tags: [probation]
+      summary: List probation records in scope
+      parameters:
+        - name: businessUnitId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Probation records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Probation"
+    post:
+      operationId: createProbation
+      tags: [probation]
+      summary: Create a probation record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProbationInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Probation"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /probation/{id}:
+    get:
+      operationId: getProbation
+      tags: [probation]
+      summary: Get a probation record
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "200":
+          description: Probation record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Probation"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    patch:
+      operationId: updateProbation
+      tags: [probation]
+      summary: Update a probation record
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProbationUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Probation"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      operationId: deleteProbation
+      tags: [probation]
+      summary: Delete a probation record
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /dashboard/kpis:
+    get:
+      operationId: getDashboardKpis
+      tags: [dashboard]
+      summary: Get scope-aware KPIs
+      parameters:
+        - name: businessUnitId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: KPIs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Kpis"
+  /dashboard/comparison:
+    get:
+      operationId: getDashboardComparison
+      tags: [dashboard]
+      summary: Compare KPIs across business units (CHRO/Director/Admin)
+      responses:
+        "200":
+          description: Per business unit KPI rows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ComparisonRow"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /dashboard/trends:
+    get:
+      operationId: getDashboardTrends
+      tags: [dashboard]
+      summary: Get monthly headcount and attrition trend
+      parameters:
+        - name: businessUnitId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Trend points
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TrendPoint"
+
+  /admin/users:
+    get:
+      operationId: listUsers
+      tags: [admin]
+      summary: List users (Admin only)
+      responses:
+        "200":
+          description: Users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      operationId: createUser
+      tags: [admin]
+      summary: Create a user (Admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /admin/users/{id}:
+    get:
+      operationId: getUser
+      tags: [admin]
+      summary: Get a user (Admin only)
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    patch:
+      operationId: updateUser
+      tags: [admin]
+      summary: Update a user (Admin only)
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      operationId: deleteUser
+      tags: [admin]
+      summary: Delete a user (Admin only)
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /audit-log:
+    get:
+      operationId: listAuditLog
+      tags: [audit]
+      summary: List audit log entries (Admin only)
+      parameters:
+        - name: entityType
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Audit log
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditLogEntry"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      summary: List rule-based alerts in scope
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notification"
+
 components:
+  parameters:
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +873,602 @@ components:
           type: string
       required:
         - status
-
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+    Persona:
+      type: object
+      required: [key, label, role]
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        role:
+          type: string
+        businessUnitName:
+          type: ["string", "null"]
+    LoginInput:
+      type: object
+      required: [persona]
+      properties:
+        persona:
+          type: string
+    AuthUser:
+      type: object
+      required: [id, email, displayName, role]
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        displayName:
+          type: string
+        role:
+          type: string
+        businessUnitId:
+          type: ["integer", "null"]
+        businessUnitName:
+          type: ["string", "null"]
+    BusinessUnit:
+      type: object
+      required: [id, name, code, isActive, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        code:
+          type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    Employee:
+      type: object
+      required:
+        [
+          id,
+          employeeNumber,
+          fullName,
+          email,
+          gender,
+          isSaudi,
+          businessUnitId,
+          jobTitle,
+          grade,
+          employmentStatus,
+          hireDate,
+          createdAt,
+          updatedAt,
+        ]
+      properties:
+        id:
+          type: integer
+        employeeNumber:
+          type: string
+        fullName:
+          type: string
+        email:
+          type: string
+        gender:
+          type: string
+          enum: [M, F]
+        isSaudi:
+          type: boolean
+        businessUnitId:
+          type: integer
+        businessUnitName:
+          type: ["string", "null"]
+        jobTitle:
+          type: string
+        grade:
+          type: string
+        employmentStatus:
+          type: string
+          enum: [active, on_probation, terminated]
+        hireDate:
+          type: string
+        terminationDate:
+          type: ["string", "null"]
+        managerId:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    EmployeeInput:
+      type: object
+      required:
+        [
+          employeeNumber,
+          fullName,
+          email,
+          gender,
+          isSaudi,
+          businessUnitId,
+          jobTitle,
+          grade,
+          employmentStatus,
+          hireDate,
+        ]
+      properties:
+        employeeNumber:
+          type: string
+          minLength: 1
+        fullName:
+          type: string
+          minLength: 1
+        email:
+          type: string
+        gender:
+          type: string
+          enum: [M, F]
+        isSaudi:
+          type: boolean
+        businessUnitId:
+          type: integer
+        jobTitle:
+          type: string
+        grade:
+          type: string
+        employmentStatus:
+          type: string
+          enum: [active, on_probation, terminated]
+        hireDate:
+          type: string
+        terminationDate:
+          type: ["string", "null"]
+        managerId:
+          type: ["integer", "null"]
+    EmployeeUpdate:
+      type: object
+      properties:
+        employeeNumber:
+          type: string
+          minLength: 1
+        fullName:
+          type: string
+          minLength: 1
+        email:
+          type: string
+        gender:
+          type: string
+          enum: [M, F]
+        isSaudi:
+          type: boolean
+        businessUnitId:
+          type: integer
+        jobTitle:
+          type: string
+        grade:
+          type: string
+        employmentStatus:
+          type: string
+          enum: [active, on_probation, terminated]
+        hireDate:
+          type: string
+        terminationDate:
+          type: ["string", "null"]
+        managerId:
+          type: ["integer", "null"]
+    Requisition:
+      type: object
+      required:
+        [id, title, businessUnitId, status, grade, openedDate, recruiter, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        businessUnitId:
+          type: integer
+        businessUnitName:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [open, on_hold, filled, cancelled]
+        grade:
+          type: string
+        openedDate:
+          type: string
+        targetCloseDate:
+          type: ["string", "null"]
+        filledDate:
+          type: ["string", "null"]
+        recruiter:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    RequisitionInput:
+      type: object
+      required: [title, businessUnitId, status, grade, openedDate, recruiter]
+      properties:
+        title:
+          type: string
+          minLength: 1
+        businessUnitId:
+          type: integer
+        status:
+          type: string
+          enum: [open, on_hold, filled, cancelled]
+        grade:
+          type: string
+        openedDate:
+          type: string
+        targetCloseDate:
+          type: ["string", "null"]
+        filledDate:
+          type: ["string", "null"]
+        recruiter:
+          type: string
+    RequisitionUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        businessUnitId:
+          type: integer
+        status:
+          type: string
+          enum: [open, on_hold, filled, cancelled]
+        grade:
+          type: string
+        openedDate:
+          type: string
+        targetCloseDate:
+          type: ["string", "null"]
+        filledDate:
+          type: ["string", "null"]
+        recruiter:
+          type: string
+    ErCase:
+      type: object
+      required:
+        [id, caseNumber, businessUnitId, caseType, severity, status, openedDate, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        caseNumber:
+          type: string
+        employeeId:
+          type: ["integer", "null"]
+        businessUnitId:
+          type: integer
+        businessUnitName:
+          type: ["string", "null"]
+        caseType:
+          type: string
+        severity:
+          type: string
+          enum: [low, medium, high]
+        status:
+          type: string
+          enum: [open, in_progress, closed]
+        openedDate:
+          type: string
+        closedDate:
+          type: ["string", "null"]
+        summary:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    ErCaseInput:
+      type: object
+      required: [caseNumber, businessUnitId, caseType, severity, status, openedDate]
+      properties:
+        caseNumber:
+          type: string
+          minLength: 1
+        employeeId:
+          type: ["integer", "null"]
+        businessUnitId:
+          type: integer
+        caseType:
+          type: string
+        severity:
+          type: string
+          enum: [low, medium, high]
+        status:
+          type: string
+          enum: [open, in_progress, closed]
+        openedDate:
+          type: string
+        closedDate:
+          type: ["string", "null"]
+        summary:
+          type: ["string", "null"]
+    ErCaseUpdate:
+      type: object
+      properties:
+        caseNumber:
+          type: string
+          minLength: 1
+        employeeId:
+          type: ["integer", "null"]
+        businessUnitId:
+          type: integer
+        caseType:
+          type: string
+        severity:
+          type: string
+          enum: [low, medium, high]
+        status:
+          type: string
+          enum: [open, in_progress, closed]
+        openedDate:
+          type: string
+        closedDate:
+          type: ["string", "null"]
+        summary:
+          type: ["string", "null"]
+    Attrition:
+      type: object
+      required: [id, employeeId, businessUnitId, attritionType, exitDate, createdAt]
+      properties:
+        id:
+          type: integer
+        employeeId:
+          type: integer
+        employeeName:
+          type: ["string", "null"]
+        businessUnitId:
+          type: integer
+        businessUnitName:
+          type: ["string", "null"]
+        attritionType:
+          type: string
+          enum: [voluntary, involuntary]
+        reason:
+          type: ["string", "null"]
+        exitDate:
+          type: string
+        createdAt:
+          type: string
+    AttritionInput:
+      type: object
+      required: [employeeId, businessUnitId, attritionType, exitDate]
+      properties:
+        employeeId:
+          type: integer
+        businessUnitId:
+          type: integer
+        attritionType:
+          type: string
+          enum: [voluntary, involuntary]
+        reason:
+          type: ["string", "null"]
+        exitDate:
+          type: string
+    Probation:
+      type: object
+      required: [id, employeeId, businessUnitId, startDate, endDate, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        employeeId:
+          type: integer
+        employeeName:
+          type: ["string", "null"]
+        businessUnitId:
+          type: integer
+        businessUnitName:
+          type: ["string", "null"]
+        startDate:
+          type: string
+        endDate:
+          type: string
+        status:
+          type: string
+          enum: [pending, passed, failed, extended]
+        reviewDate:
+          type: ["string", "null"]
+        outcome:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    ProbationInput:
+      type: object
+      required: [employeeId, businessUnitId, startDate, endDate, status]
+      properties:
+        employeeId:
+          type: integer
+        businessUnitId:
+          type: integer
+        startDate:
+          type: string
+        endDate:
+          type: string
+        status:
+          type: string
+          enum: [pending, passed, failed, extended]
+        reviewDate:
+          type: ["string", "null"]
+        outcome:
+          type: ["string", "null"]
+    ProbationUpdate:
+      type: object
+      properties:
+        startDate:
+          type: string
+        endDate:
+          type: string
+        status:
+          type: string
+          enum: [pending, passed, failed, extended]
+        reviewDate:
+          type: ["string", "null"]
+        outcome:
+          type: ["string", "null"]
+    User:
+      type: object
+      required: [id, email, displayName, role, isActive, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        displayName:
+          type: string
+        role:
+          type: string
+          enum: [HRBP, HR_DIRECTOR, CHRO, ADMIN]
+        businessUnitId:
+          type: ["integer", "null"]
+        businessUnitName:
+          type: ["string", "null"]
+        entraObjectId:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    UserInput:
+      type: object
+      required: [email, displayName, role]
+      properties:
+        email:
+          type: string
+          minLength: 1
+        displayName:
+          type: string
+          minLength: 1
+        role:
+          type: string
+          enum: [HRBP, HR_DIRECTOR, CHRO, ADMIN]
+        businessUnitId:
+          type: ["integer", "null"]
+        isActive:
+          type: boolean
+    UserUpdate:
+      type: object
+      properties:
+        email:
+          type: string
+          minLength: 1
+        displayName:
+          type: string
+          minLength: 1
+        role:
+          type: string
+          enum: [HRBP, HR_DIRECTOR, CHRO, ADMIN]
+        businessUnitId:
+          type: ["integer", "null"]
+        isActive:
+          type: boolean
+    AuditLogEntry:
+      type: object
+      required: [id, action, entityType, entityId, createdAt]
+      properties:
+        id:
+          type: integer
+        actorUserId:
+          type: ["integer", "null"]
+        actorName:
+          type: ["string", "null"]
+        action:
+          type: string
+        entityType:
+          type: string
+        entityId:
+          type: integer
+        changes:
+          type: ["object", "null"]
+          additionalProperties: true
+        createdAt:
+          type: string
+    Kpis:
+      type: object
+      required:
+        [headcount, saudizationPct, femalePct, openRoles, attritionPct, openErCases]
+      properties:
+        headcount:
+          type: integer
+        saudizationPct:
+          type: number
+        femalePct:
+          type: number
+        openRoles:
+          type: integer
+        attritionPct:
+          type: number
+        openErCases:
+          type: integer
+    ComparisonRow:
+      type: object
+      required:
+        [
+          businessUnitId,
+          businessUnitName,
+          headcount,
+          saudizationPct,
+          femalePct,
+          openRoles,
+          attritionPct,
+          openErCases,
+        ]
+      properties:
+        businessUnitId:
+          type: integer
+        businessUnitName:
+          type: string
+        headcount:
+          type: integer
+        saudizationPct:
+          type: number
+        femalePct:
+          type: number
+        openRoles:
+          type: integer
+        attritionPct:
+          type: number
+        openErCases:
+          type: integer
+    TrendPoint:
+      type: object
+      required: [month, headcount, exits]
+      properties:
+        month:
+          type: string
+        headcount:
+          type: integer
+        exits:
+          type: integer
+    Notification:
+      type: object
+      required: [id, type, severity, title, message]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        severity:
+          type: string
+          enum: [info, warning, critical]
+        title:
+          type: string
+        message:
+          type: string
+        businessUnitId:
+          type: ["integer", "null"]
+        relatedEntityType:
+          type: ["string", "null"]
+        relatedEntityId:
+          type: ["integer", "null"]
+        date:
+          type: ["string", "null"]

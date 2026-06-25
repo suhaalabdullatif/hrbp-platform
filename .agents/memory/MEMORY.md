@@ -1,0 +1,2 @@
+- [Orval/Drizzle date serialization](orval-drizzle-dates.md) — generated Zod types timestamps as plain strings; convert Drizzle `Date` columns before `.parse()`.
+- [Business-unit isolation](bu-isolation.md) — scoped writes must also block BU-moves on PATCH and validate cross-BU foreign-key (employeeId) refs on create, not just the existing row's scope.
