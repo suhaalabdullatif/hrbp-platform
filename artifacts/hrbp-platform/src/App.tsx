@@ -22,6 +22,10 @@ import ProbationDetail from "@/pages/probation-detail";
 import UsersList from "@/pages/users";
 import UserDetail from "@/pages/user-detail";
 import AuditLog from "@/pages/audit";
+import Intelligence from "@/pages/intelligence";
+import IntelligenceRisk from "@/pages/intelligence-risk";
+import IntelligenceBenchmarking from "@/pages/intelligence-benchmarking";
+import IntelligenceInsights from "@/pages/intelligence-insights";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,6 +42,10 @@ function ProtectedRouter() {
       <Switch>
         <Route path="/" component={Dashboard} />
         <Route path="/comparison" component={Comparison} />
+        <Route path="/intelligence" component={Intelligence} />
+        <Route path="/intelligence/risk" component={IntelligenceRisk} />
+        <Route path="/intelligence/benchmarking" component={IntelligenceBenchmarking} />
+        <Route path="/intelligence/insights" component={IntelligenceInsights} />
         <Route path="/employees" component={EmployeesList} />
         <Route path="/employees/new" component={EmployeeDetail} />
         <Route path="/employees/:id" component={EmployeeDetail} />

@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { 
   LayoutDashboard, 
@@ -14,7 +15,11 @@ import {
   ShieldAlert,
   GraduationCap,
   Target,
-  LineChart
+  LineChart,
+  Brain,
+  Gauge,
+  Activity,
+  Lightbulb
 } from "lucide-react";
 import { useGetCurrentUser, useLogout, UserRole } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
@@ -32,6 +37,13 @@ const mainNavItems = [
   { href: "/er-cases", label: "ER Cases", icon: AlertTriangle },
   { href: "/attrition", label: "Attrition", icon: UserMinus },
   { href: "/probation", label: "Probation", icon: UserCheck },
+];
+
+const intelligenceNavItems = [
+  { href: "/intelligence", label: "Overview", icon: Brain },
+  { href: "/intelligence/risk", label: "Workforce Risk", icon: Gauge },
+  { href: "/intelligence/benchmarking", label: "Benchmarking", icon: Activity, roles: [UserRole.CHRO, UserRole.HR_DIRECTOR, UserRole.ADMIN] },
+  { href: "/intelligence/insights", label: "Insights", icon: Lightbulb },
 ];
 
 const futureNavItems = [
@@ -93,7 +105,12 @@ function NavLinks({ className, onClick }: { className?: string; onClick?: () => 
         <div className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">Core</div>
         {renderLinks(mainNavItems)}
       </div>
-      
+
+      <div className="px-3">
+        <div className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">Intelligence</div>
+        {renderLinks(intelligenceNavItems)}
+      </div>
+
       <div className="px-3">
         <div className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">Modules</div>
         {renderLinks(futureNavItems, true)}
@@ -112,6 +129,7 @@ function NavLinks({ className, onClick }: { className?: string; onClick?: () => 
 export function AppShell({ children }: { children: ReactNode }) {
   const { data: user } = useGetCurrentUser();
   const logout = useLogout();
+  const queryClient = useQueryClient();
   const [_, setLocation] = useLocation();
 
   if (!user) return null;
@@ -120,7 +138,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const handleLogout = () => {
     logout.mutate(undefined, {
-      onSuccess: () => setLocation("/login")
+      onSuccess: () => {
+        queryClient.clear();
+        setLocation("/login");
+      }
     });
   };
 

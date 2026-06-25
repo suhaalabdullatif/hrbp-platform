@@ -11,6 +11,7 @@ import dashboardRouter from "./dashboard";
 import notificationsRouter from "./notifications";
 import adminUsersRouter from "./adminUsers";
 import auditLogRouter from "./auditLog";
+import intelligenceRouter from "./intelligence";
 
 const router: IRouter = Router();
 
@@ -26,5 +27,6 @@ router.use(dashboardRouter);
 router.use(notificationsRouter);
 router.use(adminUsersRouter);
 router.use(auditLogRouter);
+router.use(intelligenceRouter);
 
 export default router;

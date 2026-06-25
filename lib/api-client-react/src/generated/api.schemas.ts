@@ -587,6 +587,160 @@ export interface Notification {
   date?: string | null;
 }
 
+export interface SubScore {
+  key: string;
+  label: string;
+  score: number;
+  weight: number;
+  value: string;
+}
+
+export interface HealthScore {
+  businessUnitId: number;
+  businessUnitName: string;
+  headcount: number;
+  score: number;
+  rating: string;
+  subScores: SubScore[];
+}
+
+export interface RiskSignal {
+  label: string;
+  detail: string;
+  severity: string;
+}
+
+export interface RiskMetric {
+  score: number;
+  level: string;
+  signals: RiskSignal[];
+}
+
+export interface RiskProfile {
+  businessUnitId: number;
+  businessUnitName: string;
+  headcount: number;
+  workforceRisk: RiskMetric;
+  attritionRisk: RiskMetric;
+  recruitmentRisk: RiskMetric;
+  employeeRelationsRisk: RiskMetric;
+}
+
+export interface BenchmarkRow {
+  businessUnitId: number;
+  businessUnitName: string;
+  value: number;
+  rank: number;
+  percentile: number;
+}
+
+export interface BenchmarkExtreme {
+  businessUnitId: number;
+  businessUnitName: string;
+  value: number;
+}
+
+export interface BenchmarkMetric {
+  key: string;
+  label: string;
+  unit: string;
+  higherIsBetter: boolean;
+  orgAverage: number;
+  orgMedian: number;
+  best: BenchmarkExtreme | null;
+  worst: BenchmarkExtreme | null;
+  rows: BenchmarkRow[];
+}
+
+export interface Benchmarking {
+  generatedAt: string;
+  businessUnitCount: number;
+  metrics: BenchmarkMetric[];
+}
+
+export interface InsightMetric {
+  label: string;
+  value: string;
+}
+
+export interface ExecutiveInsight {
+  id: string;
+  category: string;
+  severity: string;
+  title: string;
+  narrative: string;
+  /** @nullable */
+  businessUnitId: number | null;
+  /** @nullable */
+  businessUnitName: string | null;
+  metrics: InsightMetric[];
+  recommendedActions: string[];
+}
+
+export interface BusinessUnitFacts {
+  headcount: number;
+  saudiPct: number;
+  femalePct: number;
+  attritionPct: number;
+  exitsLast12mo: number;
+  exitsRecent3mo: number;
+  exitsPrior3mo: number;
+  voluntarySharePct: number;
+  openRoles: number;
+  agingRequisitions: number;
+  /** @nullable */
+  avgTimeToFillDays: number | null;
+  openErCases: number;
+  highSeverityOpenErCases: number;
+  probationEndingSoon: number;
+  probationFailRatePct: number;
+}
+
+export interface ContextRiskItem {
+  score: number;
+  level: string;
+}
+
+export type BusinessUnitContextRisk = {
+  workforce: ContextRiskItem;
+  attrition: ContextRiskItem;
+  recruitment: ContextRiskItem;
+  employeeRelations: ContextRiskItem;
+};
+
+export interface BusinessUnitContext {
+  businessUnitId: number;
+  businessUnitName: string;
+  kpis: Kpis;
+  facts: BusinessUnitFacts;
+  healthScore: number;
+  healthRating: string;
+  risk: BusinessUnitContextRisk;
+}
+
+export type WorkforceContextPolicy = {[key: string]: number};
+
+export type WorkforceContextScope = {
+  canSeeAll: boolean;
+  businessUnitIds: number[];
+};
+
+export type WorkforceContextOrg = {
+  businessUnitCount: number;
+  totalHeadcount: number;
+  kpis: Kpis;
+  trends: TrendPoint[];
+  averageHealthScore: number;
+};
+
+export interface WorkforceContext {
+  generatedAt: string;
+  policy: WorkforceContextPolicy;
+  scope: WorkforceContextScope;
+  org: WorkforceContextOrg;
+  businessUnits: BusinessUnitContext[];
+}
+
 export type ListEmployeesParams = {
 businessUnitId?: number;
 status?: string;
@@ -617,6 +771,22 @@ businessUnitId?: number;
 };
 
 export type GetDashboardTrendsParams = {
+businessUnitId?: number;
+};
+
+export type GetIntelligenceHealthScoresParams = {
+businessUnitId?: number;
+};
+
+export type GetIntelligenceRiskParams = {
+businessUnitId?: number;
+};
+
+export type GetIntelligenceInsightsParams = {
+businessUnitId?: number;
+};
+
+export type GetIntelligenceContextParams = {
 businessUnitId?: number;
 };
 

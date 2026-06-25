@@ -47,6 +47,8 @@ A workforce-intelligence platform for HR Business Partners and executives at HUM
 - **Audit logging.** Every mutation calls `writeAudit`; failures never break the primary operation. Audit log is ADMIN-only.
 - **Rule-based alerts.** `routes/notifications.ts` computes alerts on the fly (low Saudization, high attrition, open high-severity ER cases, aging requisitions, probations ending soon) — no stored notifications table.
 - **Date serialization.** Generated Zod treats `createdAt`/`updatedAt` as strings; timestamp columns return `Date`, so routes convert via `iso()`/`isoOrNull()` from `lib/serialize.ts`. `date`-mode columns already return strings.
+- **AI Intelligence Layer (deterministic MVP).** `lib/intelligence/engine.ts` derives all intelligence from existing tables (no new DB tables): `loadFacts` does a single-pass per-BU aggregation, then `computeHealth`, attrition/recruitment/ER/workforce risk, `getBenchmarking`, and `buildWorkforceContext` (exposes every data point for future AI). Thresholds live in one `POLICY` object; all ratios are divide-by-zero / empty-scope guarded. Routes in `routes/intelligence.ts` (`/intelligence/health-scores`, `/risk`, `/benchmarking`, `/insights`, `/context`) reuse `getScope`/`resolveBusinessUnitFilter`; **benchmarking is global-only** (`requireRole`, 403 for HRBP).
+- **Pluggable insight seam.** `lib/intelligence/insights/` defines an `InsightProvider` interface; `RuleBasedInsightProvider` is the deterministic default. `getInsightProvider` is an env-selected factory (`INSIGHT_PROVIDER`, default rule-based) — drop in an OpenAI/Azure provider later without touching routes, contract, or UI.
 
 ## Product
 
@@ -55,6 +57,7 @@ A workforce-intelligence platform for HR Business Partners and executives at HUM
 - CHRO per-business-unit comparison and 12-month headcount/exit trends.
 - Scoped CRUD for employees, requisitions, ER cases, attrition (no update), and probation.
 - ADMIN-only user management and audit log.
+- Intelligence section: Overview (BU health + top risk + insights), Workforce Risk detail, Cross-BU Benchmarking (global roles only), Executive Insights — all scope-aware; benchmarking nav/CTA hidden for HRBP.
 - Scaffold-only navigation for Talent / Succession / Performance.
 
 ## User preferences

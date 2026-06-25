@@ -738,6 +738,223 @@ export const GetDashboardTrendsResponse = zod.array(GetDashboardTrendsResponseIt
 
 
 /**
+ * @summary Business-unit health scores (scope-aware)
+ */
+export const GetIntelligenceHealthScoresQueryParams = zod.object({
+  "businessUnitId": zod.coerce.number().optional()
+})
+
+export const GetIntelligenceHealthScoresResponseItem = zod.object({
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string(),
+  "headcount": zod.number(),
+  "score": zod.number(),
+  "rating": zod.string(),
+  "subScores": zod.array(zod.object({
+  "key": zod.string(),
+  "label": zod.string(),
+  "score": zod.number(),
+  "weight": zod.number(),
+  "value": zod.string()
+}))
+})
+export const GetIntelligenceHealthScoresResponse = zod.array(GetIntelligenceHealthScoresResponseItem)
+
+
+/**
+ * @summary Business-unit workforce risk profiles (scope-aware)
+ */
+export const GetIntelligenceRiskQueryParams = zod.object({
+  "businessUnitId": zod.coerce.number().optional()
+})
+
+export const GetIntelligenceRiskResponseItem = zod.object({
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string(),
+  "headcount": zod.number(),
+  "workforceRisk": zod.object({
+  "score": zod.number(),
+  "level": zod.string(),
+  "signals": zod.array(zod.object({
+  "label": zod.string(),
+  "detail": zod.string(),
+  "severity": zod.string()
+}))
+}),
+  "attritionRisk": zod.object({
+  "score": zod.number(),
+  "level": zod.string(),
+  "signals": zod.array(zod.object({
+  "label": zod.string(),
+  "detail": zod.string(),
+  "severity": zod.string()
+}))
+}),
+  "recruitmentRisk": zod.object({
+  "score": zod.number(),
+  "level": zod.string(),
+  "signals": zod.array(zod.object({
+  "label": zod.string(),
+  "detail": zod.string(),
+  "severity": zod.string()
+}))
+}),
+  "employeeRelationsRisk": zod.object({
+  "score": zod.number(),
+  "level": zod.string(),
+  "signals": zod.array(zod.object({
+  "label": zod.string(),
+  "detail": zod.string(),
+  "severity": zod.string()
+}))
+})
+})
+export const GetIntelligenceRiskResponse = zod.array(GetIntelligenceRiskResponseItem)
+
+
+/**
+ * @summary Cross-business-unit benchmarking (CHRO/Director/Admin)
+ */
+export const GetIntelligenceBenchmarkingResponse = zod.object({
+  "generatedAt": zod.string(),
+  "businessUnitCount": zod.number(),
+  "metrics": zod.array(zod.object({
+  "key": zod.string(),
+  "label": zod.string(),
+  "unit": zod.string(),
+  "higherIsBetter": zod.boolean(),
+  "orgAverage": zod.number(),
+  "orgMedian": zod.number(),
+  "best": zod.union([zod.object({
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string(),
+  "value": zod.number()
+}),zod.null()]),
+  "worst": zod.union([zod.object({
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string(),
+  "value": zod.number()
+}),zod.null()]),
+  "rows": zod.array(zod.object({
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string(),
+  "value": zod.number(),
+  "rank": zod.number(),
+  "percentile": zod.number()
+}))
+}))
+})
+
+
+/**
+ * @summary Executive insights with recommended actions (scope-aware)
+ */
+export const GetIntelligenceInsightsQueryParams = zod.object({
+  "businessUnitId": zod.coerce.number().optional()
+})
+
+export const GetIntelligenceInsightsResponseItem = zod.object({
+  "id": zod.string(),
+  "category": zod.string(),
+  "severity": zod.string(),
+  "title": zod.string(),
+  "narrative": zod.string(),
+  "businessUnitId": zod.number().nullable(),
+  "businessUnitName": zod.string().nullable(),
+  "metrics": zod.array(zod.object({
+  "label": zod.string(),
+  "value": zod.string()
+})),
+  "recommendedActions": zod.array(zod.string())
+})
+export const GetIntelligenceInsightsResponse = zod.array(GetIntelligenceInsightsResponseItem)
+
+
+/**
+ * @summary Full workforce context data points (for future AI consumers)
+ */
+export const GetIntelligenceContextQueryParams = zod.object({
+  "businessUnitId": zod.coerce.number().optional()
+})
+
+export const GetIntelligenceContextResponse = zod.object({
+  "generatedAt": zod.string(),
+  "policy": zod.record(zod.string(), zod.number()),
+  "scope": zod.object({
+  "canSeeAll": zod.boolean(),
+  "businessUnitIds": zod.array(zod.number())
+}),
+  "org": zod.object({
+  "businessUnitCount": zod.number(),
+  "totalHeadcount": zod.number(),
+  "kpis": zod.object({
+  "headcount": zod.number(),
+  "saudizationPct": zod.number(),
+  "femalePct": zod.number(),
+  "openRoles": zod.number(),
+  "attritionPct": zod.number(),
+  "openErCases": zod.number()
+}),
+  "trends": zod.array(zod.object({
+  "month": zod.string(),
+  "headcount": zod.number(),
+  "exits": zod.number()
+})),
+  "averageHealthScore": zod.number()
+}),
+  "businessUnits": zod.array(zod.object({
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string(),
+  "kpis": zod.object({
+  "headcount": zod.number(),
+  "saudizationPct": zod.number(),
+  "femalePct": zod.number(),
+  "openRoles": zod.number(),
+  "attritionPct": zod.number(),
+  "openErCases": zod.number()
+}),
+  "facts": zod.object({
+  "headcount": zod.number(),
+  "saudiPct": zod.number(),
+  "femalePct": zod.number(),
+  "attritionPct": zod.number(),
+  "exitsLast12mo": zod.number(),
+  "exitsRecent3mo": zod.number(),
+  "exitsPrior3mo": zod.number(),
+  "voluntarySharePct": zod.number(),
+  "openRoles": zod.number(),
+  "agingRequisitions": zod.number(),
+  "avgTimeToFillDays": zod.number().nullable(),
+  "openErCases": zod.number(),
+  "highSeverityOpenErCases": zod.number(),
+  "probationEndingSoon": zod.number(),
+  "probationFailRatePct": zod.number()
+}),
+  "healthScore": zod.number(),
+  "healthRating": zod.string(),
+  "risk": zod.object({
+  "workforce": zod.object({
+  "score": zod.number(),
+  "level": zod.string()
+}),
+  "attrition": zod.object({
+  "score": zod.number(),
+  "level": zod.string()
+}),
+  "recruitment": zod.object({
+  "score": zod.number(),
+  "level": zod.string()
+}),
+  "employeeRelations": zod.object({
+  "score": zod.number(),
+  "level": zod.string()
+})
+})
+}))
+})
+
+
+/**
  * @summary List users (Admin only)
  */
 export const ListUsersResponseItem = zod.object({

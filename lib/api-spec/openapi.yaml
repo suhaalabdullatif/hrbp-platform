@@ -32,6 +32,8 @@ tags:
     description: Audit log
   - name: notifications
     description: Alerts and notifications
+  - name: intelligence
+    description: Workforce intelligence (scores, risk, benchmarking, insights)
 paths:
   /healthz:
     get:
@@ -705,6 +707,103 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/TrendPoint"
+
+  /intelligence/health-scores:
+    get:
+      operationId: getIntelligenceHealthScores
+      tags: [intelligence]
+      summary: Business-unit health scores (scope-aware)
+      parameters:
+        - name: businessUnitId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Health scores
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/HealthScore"
+  /intelligence/risk:
+    get:
+      operationId: getIntelligenceRisk
+      tags: [intelligence]
+      summary: Business-unit workforce risk profiles (scope-aware)
+      parameters:
+        - name: businessUnitId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Risk profiles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RiskProfile"
+  /intelligence/benchmarking:
+    get:
+      operationId: getIntelligenceBenchmarking
+      tags: [intelligence]
+      summary: Cross-business-unit benchmarking (CHRO/Director/Admin)
+      responses:
+        "200":
+          description: Benchmarking across business units
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Benchmarking"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /intelligence/insights:
+    get:
+      operationId: getIntelligenceInsights
+      tags: [intelligence]
+      summary: Executive insights with recommended actions (scope-aware)
+      parameters:
+        - name: businessUnitId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Executive insights
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ExecutiveInsight"
+  /intelligence/context:
+    get:
+      operationId: getIntelligenceContext
+      tags: [intelligence]
+      summary: Full workforce context data points (for future AI consumers)
+      parameters:
+        - name: businessUnitId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Workforce context
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkforceContext"
 
   /admin/users:
     get:
@@ -1472,3 +1571,324 @@ components:
           type: ["integer", "null"]
         date:
           type: ["string", "null"]
+    SubScore:
+      type: object
+      required: [key, label, score, weight, value]
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        score:
+          type: number
+        weight:
+          type: number
+        value:
+          type: string
+    HealthScore:
+      type: object
+      required:
+        [businessUnitId, businessUnitName, headcount, score, rating, subScores]
+      properties:
+        businessUnitId:
+          type: integer
+        businessUnitName:
+          type: string
+        headcount:
+          type: integer
+        score:
+          type: number
+        rating:
+          type: string
+        subScores:
+          type: array
+          items:
+            $ref: "#/components/schemas/SubScore"
+    RiskSignal:
+      type: object
+      required: [label, detail, severity]
+      properties:
+        label:
+          type: string
+        detail:
+          type: string
+        severity:
+          type: string
+    RiskMetric:
+      type: object
+      required: [score, level, signals]
+      properties:
+        score:
+          type: number
+        level:
+          type: string
+        signals:
+          type: array
+          items:
+            $ref: "#/components/schemas/RiskSignal"
+    RiskProfile:
+      type: object
+      required:
+        [
+          businessUnitId,
+          businessUnitName,
+          headcount,
+          workforceRisk,
+          attritionRisk,
+          recruitmentRisk,
+          employeeRelationsRisk,
+        ]
+      properties:
+        businessUnitId:
+          type: integer
+        businessUnitName:
+          type: string
+        headcount:
+          type: integer
+        workforceRisk:
+          $ref: "#/components/schemas/RiskMetric"
+        attritionRisk:
+          $ref: "#/components/schemas/RiskMetric"
+        recruitmentRisk:
+          $ref: "#/components/schemas/RiskMetric"
+        employeeRelationsRisk:
+          $ref: "#/components/schemas/RiskMetric"
+    BenchmarkRow:
+      type: object
+      required: [businessUnitId, businessUnitName, value, rank, percentile]
+      properties:
+        businessUnitId:
+          type: integer
+        businessUnitName:
+          type: string
+        value:
+          type: number
+        rank:
+          type: integer
+        percentile:
+          type: number
+    BenchmarkExtreme:
+      type: object
+      required: [businessUnitId, businessUnitName, value]
+      properties:
+        businessUnitId:
+          type: integer
+        businessUnitName:
+          type: string
+        value:
+          type: number
+    BenchmarkMetric:
+      type: object
+      required:
+        [key, label, unit, higherIsBetter, orgAverage, orgMedian, best, worst, rows]
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        unit:
+          type: string
+        higherIsBetter:
+          type: boolean
+        orgAverage:
+          type: number
+        orgMedian:
+          type: number
+        best:
+          oneOf:
+            - $ref: "#/components/schemas/BenchmarkExtreme"
+            - type: "null"
+        worst:
+          oneOf:
+            - $ref: "#/components/schemas/BenchmarkExtreme"
+            - type: "null"
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/BenchmarkRow"
+    Benchmarking:
+      type: object
+      required: [generatedAt, businessUnitCount, metrics]
+      properties:
+        generatedAt:
+          type: string
+        businessUnitCount:
+          type: integer
+        metrics:
+          type: array
+          items:
+            $ref: "#/components/schemas/BenchmarkMetric"
+    InsightMetric:
+      type: object
+      required: [label, value]
+      properties:
+        label:
+          type: string
+        value:
+          type: string
+    ExecutiveInsight:
+      type: object
+      required:
+        [
+          id,
+          category,
+          severity,
+          title,
+          narrative,
+          businessUnitId,
+          businessUnitName,
+          metrics,
+          recommendedActions,
+        ]
+      properties:
+        id:
+          type: string
+        category:
+          type: string
+        severity:
+          type: string
+        title:
+          type: string
+        narrative:
+          type: string
+        businessUnitId:
+          type: ["integer", "null"]
+        businessUnitName:
+          type: ["string", "null"]
+        metrics:
+          type: array
+          items:
+            $ref: "#/components/schemas/InsightMetric"
+        recommendedActions:
+          type: array
+          items:
+            type: string
+    BusinessUnitFacts:
+      type: object
+      required:
+        [
+          headcount,
+          saudiPct,
+          femalePct,
+          attritionPct,
+          exitsLast12mo,
+          exitsRecent3mo,
+          exitsPrior3mo,
+          voluntarySharePct,
+          openRoles,
+          agingRequisitions,
+          avgTimeToFillDays,
+          openErCases,
+          highSeverityOpenErCases,
+          probationEndingSoon,
+          probationFailRatePct,
+        ]
+      properties:
+        headcount:
+          type: integer
+        saudiPct:
+          type: number
+        femalePct:
+          type: number
+        attritionPct:
+          type: number
+        exitsLast12mo:
+          type: integer
+        exitsRecent3mo:
+          type: integer
+        exitsPrior3mo:
+          type: integer
+        voluntarySharePct:
+          type: number
+        openRoles:
+          type: integer
+        agingRequisitions:
+          type: integer
+        avgTimeToFillDays:
+          type: ["integer", "null"]
+        openErCases:
+          type: integer
+        highSeverityOpenErCases:
+          type: integer
+        probationEndingSoon:
+          type: integer
+        probationFailRatePct:
+          type: number
+    ContextRiskItem:
+      type: object
+      required: [score, level]
+      properties:
+        score:
+          type: number
+        level:
+          type: string
+    BusinessUnitContext:
+      type: object
+      required:
+        [businessUnitId, businessUnitName, kpis, facts, healthScore, healthRating, risk]
+      properties:
+        businessUnitId:
+          type: integer
+        businessUnitName:
+          type: string
+        kpis:
+          $ref: "#/components/schemas/Kpis"
+        facts:
+          $ref: "#/components/schemas/BusinessUnitFacts"
+        healthScore:
+          type: number
+        healthRating:
+          type: string
+        risk:
+          type: object
+          required: [workforce, attrition, recruitment, employeeRelations]
+          properties:
+            workforce:
+              $ref: "#/components/schemas/ContextRiskItem"
+            attrition:
+              $ref: "#/components/schemas/ContextRiskItem"
+            recruitment:
+              $ref: "#/components/schemas/ContextRiskItem"
+            employeeRelations:
+              $ref: "#/components/schemas/ContextRiskItem"
+    WorkforceContext:
+      type: object
+      required: [generatedAt, policy, scope, org, businessUnits]
+      properties:
+        generatedAt:
+          type: string
+        policy:
+          type: object
+          additionalProperties:
+            type: number
+        scope:
+          type: object
+          required: [canSeeAll, businessUnitIds]
+          properties:
+            canSeeAll:
+              type: boolean
+            businessUnitIds:
+              type: array
+              items:
+                type: integer
+        org:
+          type: object
+          required:
+            [businessUnitCount, totalHeadcount, kpis, trends, averageHealthScore]
+          properties:
+            businessUnitCount:
+              type: integer
+            totalHeadcount:
+              type: integer
+            kpis:
+              $ref: "#/components/schemas/Kpis"
+            trends:
+              type: array
+              items:
+                $ref: "#/components/schemas/TrendPoint"
+            averageHealthScore:
+              type: number
+        businessUnits:
+          type: array
+          items:
+            $ref: "#/components/schemas/BusinessUnitContext"

@@ -24,6 +24,7 @@ import type {
   AttritionInput,
   AuditLogEntry,
   AuthUser,
+  Benchmarking,
   BusinessUnit,
   ComparisonRow,
   Employee,
@@ -33,8 +34,14 @@ import type {
   ErCaseInput,
   ErCaseUpdate,
   Error,
+  ExecutiveInsight,
   GetDashboardKpisParams,
   GetDashboardTrendsParams,
+  GetIntelligenceContextParams,
+  GetIntelligenceHealthScoresParams,
+  GetIntelligenceInsightsParams,
+  GetIntelligenceRiskParams,
+  HealthScore,
   HealthStatus,
   Kpis,
   ListAttritionParams,
@@ -52,10 +59,12 @@ import type {
   Requisition,
   RequisitionInput,
   RequisitionUpdate,
+  RiskProfile,
   TrendPoint,
   User,
   UserInput,
-  UserUpdate
+  UserUpdate,
+  WorkforceContext
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -2556,6 +2565,419 @@ export function useGetDashboardTrends<TData = Awaited<ReturnType<typeof getDashb
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetDashboardTrendsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetIntelligenceHealthScoresUrl = (params?: GetIntelligenceHealthScoresParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/intelligence/health-scores?${stringifiedParams}` : `/api/intelligence/health-scores`
+}
+
+/**
+ * @summary Business-unit health scores (scope-aware)
+ */
+export const getIntelligenceHealthScores = async (params?: GetIntelligenceHealthScoresParams, options?: RequestInit): Promise<HealthScore[]> => {
+
+  return customFetch<HealthScore[]>(getGetIntelligenceHealthScoresUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetIntelligenceHealthScoresQueryKey = (params?: GetIntelligenceHealthScoresParams,) => {
+    return [
+    `/api/intelligence/health-scores`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetIntelligenceHealthScoresQueryOptions = <TData = Awaited<ReturnType<typeof getIntelligenceHealthScores>>, TError = ErrorType<unknown>>(params?: GetIntelligenceHealthScoresParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceHealthScores>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetIntelligenceHealthScoresQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getIntelligenceHealthScores>>> = ({ signal }) => getIntelligenceHealthScores(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceHealthScores>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetIntelligenceHealthScoresQueryResult = NonNullable<Awaited<ReturnType<typeof getIntelligenceHealthScores>>>
+export type GetIntelligenceHealthScoresQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Business-unit health scores (scope-aware)
+ */
+
+export function useGetIntelligenceHealthScores<TData = Awaited<ReturnType<typeof getIntelligenceHealthScores>>, TError = ErrorType<unknown>>(
+ params?: GetIntelligenceHealthScoresParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceHealthScores>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetIntelligenceHealthScoresQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetIntelligenceRiskUrl = (params?: GetIntelligenceRiskParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/intelligence/risk?${stringifiedParams}` : `/api/intelligence/risk`
+}
+
+/**
+ * @summary Business-unit workforce risk profiles (scope-aware)
+ */
+export const getIntelligenceRisk = async (params?: GetIntelligenceRiskParams, options?: RequestInit): Promise<RiskProfile[]> => {
+
+  return customFetch<RiskProfile[]>(getGetIntelligenceRiskUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetIntelligenceRiskQueryKey = (params?: GetIntelligenceRiskParams,) => {
+    return [
+    `/api/intelligence/risk`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetIntelligenceRiskQueryOptions = <TData = Awaited<ReturnType<typeof getIntelligenceRisk>>, TError = ErrorType<unknown>>(params?: GetIntelligenceRiskParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceRisk>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetIntelligenceRiskQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getIntelligenceRisk>>> = ({ signal }) => getIntelligenceRisk(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceRisk>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetIntelligenceRiskQueryResult = NonNullable<Awaited<ReturnType<typeof getIntelligenceRisk>>>
+export type GetIntelligenceRiskQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Business-unit workforce risk profiles (scope-aware)
+ */
+
+export function useGetIntelligenceRisk<TData = Awaited<ReturnType<typeof getIntelligenceRisk>>, TError = ErrorType<unknown>>(
+ params?: GetIntelligenceRiskParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceRisk>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetIntelligenceRiskQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetIntelligenceBenchmarkingUrl = () => {
+
+
+
+
+  return `/api/intelligence/benchmarking`
+}
+
+/**
+ * @summary Cross-business-unit benchmarking (CHRO/Director/Admin)
+ */
+export const getIntelligenceBenchmarking = async ( options?: RequestInit): Promise<Benchmarking> => {
+
+  return customFetch<Benchmarking>(getGetIntelligenceBenchmarkingUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetIntelligenceBenchmarkingQueryKey = () => {
+    return [
+    `/api/intelligence/benchmarking`
+    ] as const;
+    }
+
+
+export const getGetIntelligenceBenchmarkingQueryOptions = <TData = Awaited<ReturnType<typeof getIntelligenceBenchmarking>>, TError = ErrorType<Error>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceBenchmarking>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetIntelligenceBenchmarkingQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getIntelligenceBenchmarking>>> = ({ signal }) => getIntelligenceBenchmarking({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceBenchmarking>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetIntelligenceBenchmarkingQueryResult = NonNullable<Awaited<ReturnType<typeof getIntelligenceBenchmarking>>>
+export type GetIntelligenceBenchmarkingQueryError = ErrorType<Error>
+
+
+/**
+ * @summary Cross-business-unit benchmarking (CHRO/Director/Admin)
+ */
+
+export function useGetIntelligenceBenchmarking<TData = Awaited<ReturnType<typeof getIntelligenceBenchmarking>>, TError = ErrorType<Error>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceBenchmarking>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetIntelligenceBenchmarkingQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetIntelligenceInsightsUrl = (params?: GetIntelligenceInsightsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/intelligence/insights?${stringifiedParams}` : `/api/intelligence/insights`
+}
+
+/**
+ * @summary Executive insights with recommended actions (scope-aware)
+ */
+export const getIntelligenceInsights = async (params?: GetIntelligenceInsightsParams, options?: RequestInit): Promise<ExecutiveInsight[]> => {
+
+  return customFetch<ExecutiveInsight[]>(getGetIntelligenceInsightsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetIntelligenceInsightsQueryKey = (params?: GetIntelligenceInsightsParams,) => {
+    return [
+    `/api/intelligence/insights`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetIntelligenceInsightsQueryOptions = <TData = Awaited<ReturnType<typeof getIntelligenceInsights>>, TError = ErrorType<unknown>>(params?: GetIntelligenceInsightsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceInsights>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetIntelligenceInsightsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getIntelligenceInsights>>> = ({ signal }) => getIntelligenceInsights(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceInsights>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetIntelligenceInsightsQueryResult = NonNullable<Awaited<ReturnType<typeof getIntelligenceInsights>>>
+export type GetIntelligenceInsightsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Executive insights with recommended actions (scope-aware)
+ */
+
+export function useGetIntelligenceInsights<TData = Awaited<ReturnType<typeof getIntelligenceInsights>>, TError = ErrorType<unknown>>(
+ params?: GetIntelligenceInsightsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceInsights>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetIntelligenceInsightsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetIntelligenceContextUrl = (params?: GetIntelligenceContextParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/intelligence/context?${stringifiedParams}` : `/api/intelligence/context`
+}
+
+/**
+ * @summary Full workforce context data points (for future AI consumers)
+ */
+export const getIntelligenceContext = async (params?: GetIntelligenceContextParams, options?: RequestInit): Promise<WorkforceContext> => {
+
+  return customFetch<WorkforceContext>(getGetIntelligenceContextUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetIntelligenceContextQueryKey = (params?: GetIntelligenceContextParams,) => {
+    return [
+    `/api/intelligence/context`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetIntelligenceContextQueryOptions = <TData = Awaited<ReturnType<typeof getIntelligenceContext>>, TError = ErrorType<unknown>>(params?: GetIntelligenceContextParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceContext>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetIntelligenceContextQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getIntelligenceContext>>> = ({ signal }) => getIntelligenceContext(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceContext>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetIntelligenceContextQueryResult = NonNullable<Awaited<ReturnType<typeof getIntelligenceContext>>>
+export type GetIntelligenceContextQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Full workforce context data points (for future AI consumers)
+ */
+
+export function useGetIntelligenceContext<TData = Awaited<ReturnType<typeof getIntelligenceContext>>, TError = ErrorType<unknown>>(
+ params?: GetIntelligenceContextParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceContext>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetIntelligenceContextQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
