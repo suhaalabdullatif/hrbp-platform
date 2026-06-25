@@ -23,6 +23,14 @@ A workforce-intelligence platform for HR Business Partners and executives at HUM
 - Frontend: React + Vite, TanStack Query, react-hook-form, Recharts
 - Build: esbuild (CJS bundle)
 
+## Design system (HUMAIN brand)
+
+- **Token-driven.** All theming lives in CSS custom properties in `artifacts/hrbp-platform/src/index.css`. The shadcn-style UI library (`src/components/ui/*`) and every page consume these tokens, so editing tokens rebrands the whole app at once. Do not hardcode hex colors in components — use token classes (`bg-primary`, `text-foreground`, etc.).
+- **Palette.** Neutrals White/Black/Stone (#E5E5E5) + signature "Rise" gradient Aqua `#00879F` → Air `#00D49C` → Oasis `#D0F94A`. Primary = aqua. Sidebar is a premium near-black surface; active nav uses a deepened aqua tuned for WCAG AA against white text.
+- **Typography.** Optician Sans (bundled webfont in `src/assets/fonts/`) for display/headlines/numbers via `--app-font-display` and the `.font-display` / `font-display` utility; Inter for body. `h1`/`h2` use the display face in **natural case** — apply the `uppercase` utility explicitly only on static marketing/section headings (e.g. login hero), never on dynamic titles like names.
+- **Gradient utilities.** `.bg-rise`, `.text-rise`, `.border-rise` apply the Rise gradient (defined in `@layer components`).
+- **Logo.** `src/components/brand/wordmark.tsx` renders the HUMAIN wordmark; PNGs (white/black) live in `src/assets/brand/`.
+
 ## Where things live
 
 - API contract (source of truth): `lib/api-spec/openapi.yaml`. Generated Zod in `@workspace/api-zod`, React Query hooks in `@workspace/api-client-react`.

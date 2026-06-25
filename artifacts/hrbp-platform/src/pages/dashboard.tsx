@@ -29,21 +29,24 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h2>
+        <h2 className="text-3xl text-foreground">Dashboard</h2>
         <p className="text-muted-foreground">Overview of your workforce metrics</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {kpiCards.map((kpi, i) => (
-          <Card key={i}>
+          <Card key={i} className="relative overflow-hidden">
+            <span className="absolute inset-x-0 top-0 h-1 bg-rise" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 {kpi.title}
               </CardTitle>
-              <kpi.icon className="h-4 w-4 text-muted-foreground" />
+              <span className="flex h-8 w-8 items-center justify-center rounded-md bg-accent text-accent-foreground">
+                <kpi.icon className="h-4 w-4" />
+              </span>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{kpi.format(kpi.value)}</div>
+              <div className="font-display text-4xl text-foreground">{kpi.format(kpi.value)}</div>
             </CardContent>
           </Card>
         ))}

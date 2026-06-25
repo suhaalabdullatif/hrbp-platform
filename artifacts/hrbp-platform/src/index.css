@@ -4,6 +4,17 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* HUMAIN brand display font — Optician Sans (used for headlines & numbers) */
+@font-face {
+  font-family: "Optician Sans";
+  src:
+    url("./assets/fonts/optician-sans.woff2") format("woff2"),
+    url("./assets/fonts/optician-sans.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme inline {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
@@ -39,6 +50,12 @@
   --color-destructive-foreground: hsl(var(--destructive-foreground));
   --color-destructive-border: var(--destructive-border);
 
+  /* HUMAIN signature palette (Rise gradient stops) */
+  --color-aqua: hsl(var(--aqua));
+  --color-air: hsl(var(--air));
+  --color-oasis: hsl(var(--oasis));
+  --color-stone: hsl(var(--stone));
+
   --color-chart-1: hsl(var(--chart-1));
   --color-chart-2: hsl(var(--chart-2));
   --color-chart-3: hsl(var(--chart-3));
@@ -59,6 +76,7 @@
   --font-sans: var(--app-font-sans);
   --font-serif: var(--app-font-serif);
   --font-mono: var(--app-font-mono);
+  --font-display: var(--app-font-display);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -66,119 +84,138 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* LIGHT MODE - Corporate Navy & Slate */
+/*
+  HUMAIN BRAND SYSTEM — light mode
+  Neutrals: White #FFFFFF, Black #000000, Stone #E5E5E5
+  Signature Rise gradient: Aqua #00879F -> Air #00D49C -> Oasis #D0F94A
+  Display: Optician Sans (headlines, numbers) | Body: Inter (ABC Repro substitute)
+*/
 :root {
-  --button-outline: rgba(0,0,0, .10);
-  --badge-outline: rgba(0,0,0, .05);
+  --button-outline: rgba(0, 0, 0, 0.1);
+  --badge-outline: rgba(0, 0, 0, 0.05);
 
   --opaque-button-border-intensity: -8;
 
-  --elevate-1: rgba(0,0,0, .03);
-  --elevate-2: rgba(0,0,0, .08);
+  --elevate-1: rgba(0, 0, 0, 0.03);
+  --elevate-2: rgba(0, 0, 0, 0.07);
 
-  --background: 210 40% 98%; /* slate-50 */
-  --foreground: 222 47% 11%; /* slate-900 */
+  /* Brand raw tokens */
+  --aqua: 189 100% 31%; /* #00879F */
+  --air: 164 100% 42%; /* #00D49C */
+  --oasis: 74 93% 63%; /* #D0F94A */
+  --stone: 0 0% 90%; /* #E5E5E5 */
+
+  --background: 0 0% 100%; /* white */
+  --foreground: 0 0% 9%; /* near-black ink */
 
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-  --card-border: 214 32% 91%;
+  --card-foreground: 0 0% 9%;
+  --card-border: 0 0% 90%; /* stone */
 
   --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
-  --popover-border: 214 32% 91%;
+  --popover-foreground: 0 0% 9%;
+  --popover-border: 0 0% 90%;
 
-  --primary: 224 64% 33%; /* deep navy */
-  --primary-foreground: 210 40% 98%;
+  --primary: 189 100% 27%; /* Aqua — primary interactive */
+  --primary-foreground: 0 0% 100%;
 
-  --secondary: 214 32% 91%;
-  --secondary-foreground: 222 47% 11%;
+  --secondary: 0 0% 96%;
+  --secondary-foreground: 0 0% 9%;
 
-  --muted: 210 40% 96%;
-  --muted-foreground: 215 16% 47%;
-  
-  --accent: 210 40% 96%;
-  --accent-foreground: 222 47% 11%;
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 40%;
 
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 210 40% 98%;
+  --accent: 186 60% 95%; /* subtle aqua tint for hover surfaces */
+  --accent-foreground: 189 100% 20%;
 
-  --border: 214 32% 91%;
-  --input: 214 32% 91%;
-  --ring: 224 64% 33%;
+  --destructive: 0 72% 48%;
+  --destructive-foreground: 0 0% 100%;
 
-  --chart-1: 224 64% 33%; /* Navy */
-  --chart-2: 199 89% 48%; /* Light blue */
-  --chart-3: 160 84% 39%; /* Teal */
-  --chart-4: 43 74% 66%; /* Gold */
-  --chart-5: 0 84% 60%; /* Red */
+  --border: 0 0% 90%; /* stone */
+  --input: 0 0% 87%;
+  --ring: 189 100% 31%; /* aqua focus */
 
-  --sidebar: 0 0% 100%;
-  --sidebar-foreground: 222 47% 11%;
-  --sidebar-border: 214 32% 91%;
-  --sidebar-primary: 224 64% 33%;
-  --sidebar-primary-foreground: 210 40% 98%;
-  --sidebar-accent: 210 40% 96%;
-  --sidebar-accent-foreground: 222 47% 11%;
-  --sidebar-ring: 224 64% 33%;
+  /* Brand chart palette: aqua -> air -> oasis -> ink -> stone */
+  --chart-1: 189 100% 31%; /* aqua */
+  --chart-2: 164 100% 42%; /* air */
+  --chart-3: 74 70% 50%; /* oasis (darkened for contrast on white) */
+  --chart-4: 0 0% 20%; /* ink */
+  --chart-5: 0 0% 65%; /* stone-grey */
+
+  /* Premium dark sidebar (black ground, white wordmark) */
+  --sidebar: 0 0% 7%; /* near-black */
+  --sidebar-foreground: 0 0% 78%;
+  --sidebar-border: 0 0% 16%;
+  --sidebar-primary: 189 100% 26%; /* deep aqua active (AA contrast with white text) */
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 0 0% 13%; /* hover surface */
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-ring: 189 100% 38%;
 
   --app-font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --app-font-serif: Georgia, serif;
   --app-font-mono: Menlo, monospace;
-  
+  --app-font-display: "Optician Sans", "Inter", sans-serif;
+
   --radius: 0.5rem;
 }
 
 .dark {
-  --button-outline: rgba(255,255,255, .10);
-  --badge-outline: rgba(255,255,255, .05);
+  --button-outline: rgba(255, 255, 255, 0.1);
+  --badge-outline: rgba(255, 255, 255, 0.05);
   --opaque-button-border-intensity: 9;
-  --elevate-1: rgba(255,255,255, .04);
-  --elevate-2: rgba(255,255,255, .09);
+  --elevate-1: rgba(255, 255, 255, 0.04);
+  --elevate-2: rgba(255, 255, 255, 0.09);
 
-  --background: 222 47% 11%;
-  --foreground: 210 40% 98%;
+  --aqua: 189 90% 40%;
+  --air: 164 90% 45%;
+  --oasis: 74 93% 63%;
+  --stone: 0 0% 24%;
 
-  --card: 222 47% 11%;
-  --card-foreground: 210 40% 98%;
-  --card-border: 217 32% 17%;
+  --background: 0 0% 6%; /* near-black */
+  --foreground: 0 0% 96%;
 
-  --popover: 222 47% 11%;
-  --popover-foreground: 210 40% 98%;
-  --popover-border: 217 32% 17%;
+  --card: 0 0% 9%;
+  --card-foreground: 0 0% 96%;
+  --card-border: 0 0% 16%;
 
-  --primary: 210 40% 98%;
-  --primary-foreground: 222 47% 11%;
+  --popover: 0 0% 9%;
+  --popover-foreground: 0 0% 96%;
+  --popover-border: 0 0% 16%;
 
-  --secondary: 217 32% 17%;
-  --secondary-foreground: 210 40% 98%;
+  --primary: 189 90% 42%; /* aqua */
+  --primary-foreground: 0 0% 4%;
 
-  --muted: 217 32% 17%;
-  --muted-foreground: 215 20% 65%;
+  --secondary: 0 0% 15%;
+  --secondary-foreground: 0 0% 96%;
 
-  --accent: 217 32% 17%;
-  --accent-foreground: 210 40% 98%;
+  --muted: 0 0% 15%;
+  --muted-foreground: 0 0% 62%;
 
-  --destructive: 0 62% 30%;
-  --destructive-foreground: 210 40% 98%;
+  --accent: 0 0% 15%;
+  --accent-foreground: 0 0% 96%;
 
-  --border: 217 32% 17%;
-  --input: 217 32% 17%;
-  --ring: 212 96% 78%;
+  --destructive: 0 62% 45%;
+  --destructive-foreground: 0 0% 100%;
 
-  --chart-1: 212 96% 78%;
-  --chart-2: 199 89% 48%;
-  --chart-3: 160 84% 39%;
-  --chart-4: 43 74% 66%;
-  --chart-5: 0 84% 60%;
+  --border: 0 0% 16%;
+  --input: 0 0% 18%;
+  --ring: 189 90% 50%;
 
-  --sidebar: 222 47% 11%;
-  --sidebar-foreground: 210 40% 98%;
-  --sidebar-border: 217 32% 17%;
-  --sidebar-primary: 210 40% 98%;
-  --sidebar-primary-foreground: 222 47% 11%;
-  --sidebar-accent: 217 32% 17%;
-  --sidebar-accent-foreground: 210 40% 98%;
-  --sidebar-ring: 212 96% 78%;
+  --chart-1: 189 90% 48%;
+  --chart-2: 164 90% 48%;
+  --chart-3: 74 93% 63%;
+  --chart-4: 0 0% 80%;
+  --chart-5: 0 0% 50%;
+
+  --sidebar: 0 0% 4%;
+  --sidebar-foreground: 0 0% 78%;
+  --sidebar-border: 0 0% 14%;
+  --sidebar-primary: 189 90% 42%;
+  --sidebar-primary-foreground: 0 0% 4%;
+  --sidebar-accent: 0 0% 12%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-ring: 189 90% 50%;
 }
 
 @layer base {
@@ -187,5 +224,61 @@
   }
   body {
     @apply font-sans antialiased bg-background text-foreground;
+  }
+
+  /*
+    Brand typographic hierarchy.
+    Headlines use Optician Sans (geometric brand display face) with tight
+    leading, per HUMAIN guidelines. Body remains Inter for legibility.
+    Natural case is preserved so dynamic titles (names, etc.) stay readable;
+    add the `uppercase` utility on static marketing/section headings only.
+  */
+  h1,
+  h2 {
+    font-family: var(--app-font-display);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    line-height: 1.05;
+  }
+}
+
+@layer components {
+  /* HUMAIN signature Rise gradient utilities */
+  .bg-rise {
+    background-image: linear-gradient(
+      135deg,
+      hsl(var(--aqua)) 0%,
+      hsl(var(--air)) 52%,
+      hsl(var(--oasis)) 100%
+    );
+  }
+
+  .text-rise {
+    background-image: linear-gradient(
+      120deg,
+      hsl(var(--aqua)) 0%,
+      hsl(var(--air)) 55%,
+      hsl(var(--oasis)) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .border-rise {
+    border-image: linear-gradient(
+        135deg,
+        hsl(var(--aqua)),
+        hsl(var(--air)),
+        hsl(var(--oasis))
+      )
+      1;
+  }
+
+  /* Display utility for brand numbers / stat figures */
+  .font-display {
+    font-family: var(--app-font-display);
+    font-weight: 400;
+    letter-spacing: 0.01em;
   }
 }

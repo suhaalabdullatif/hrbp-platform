@@ -1,2 +1,3 @@
 - [Orval/Drizzle date serialization](orval-drizzle-dates.md) — generated Zod types timestamps as plain strings; convert Drizzle `Date` columns before `.parse()`.
 - [Business-unit isolation](bu-isolation.md) — scoped writes must also block BU-moves on PATCH and validate cross-BU foreign-key (employeeId) refs on create, not just the existing row's scope.
+- [HUMAIN brand design system](humain-brand-system.md) — token-driven theming in index.css rebrands whole shadcn lib; Optician Sans from npm; keep h1/h2 natural-case (no global uppercase) and sidebar aqua deep enough for AA.

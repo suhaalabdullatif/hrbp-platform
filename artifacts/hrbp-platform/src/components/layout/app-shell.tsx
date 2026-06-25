@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Wordmark } from "@/components/brand/wordmark";
 import { cn } from "@/lib/utils";
 
 const mainNavItems = [
@@ -58,10 +59,10 @@ function NavLinks({ className, onClick }: { className?: string; onClick?: () => 
         const isActive = location === item.href;
         if (disabled) {
            return (
-            <div key={item.href} className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground opacity-60 cursor-not-allowed">
+            <div key={item.href} className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-sidebar-foreground/50 cursor-not-allowed">
               <item.icon className="h-4 w-4" />
               {item.label}
-              <span className="ml-auto text-[10px] uppercase tracking-wider bg-muted px-1.5 py-0.5 rounded">Soon</span>
+              <span className="ml-auto text-[10px] uppercase tracking-wider bg-sidebar-accent text-sidebar-foreground/70 px-1.5 py-0.5 rounded">Soon</span>
             </div>
            );
         }
@@ -71,8 +72,8 @@ function NavLinks({ className, onClick }: { className?: string; onClick?: () => 
               className={cn(
                 "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors cursor-pointer",
                 isActive
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               )}
             >
               <item.icon className="h-4 w-4" />
@@ -89,18 +90,18 @@ function NavLinks({ className, onClick }: { className?: string; onClick?: () => 
   return (
     <div className="flex-1 overflow-auto py-4 flex flex-col gap-6">
       <div className="px-3">
-        <div className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Core</div>
+        <div className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">Core</div>
         {renderLinks(mainNavItems)}
       </div>
       
       <div className="px-3">
-        <div className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Modules</div>
+        <div className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">Modules</div>
         {renderLinks(futureNavItems, true)}
       </div>
 
       {adminLinks.length > 0 && (
         <div className="px-3 mt-auto">
-          <div className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Administration</div>
+          <div className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">Administration</div>
           {renderLinks(adminLinks)}
         </div>
       )}
@@ -126,24 +127,23 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 flex-col border-r bg-card">
-        <div className="flex h-14 items-center border-b px-6">
-          <div className="flex items-center gap-2 font-bold text-primary">
-            <Briefcase className="h-5 w-5" />
-            <span>Workforce Intel</span>
-          </div>
+      <aside className="hidden md:flex w-64 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
+        <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-6">
+          <Wordmark variant="white" className="h-5" />
+          <span className="h-4 w-px bg-sidebar-border" />
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sidebar-foreground/60">HRBP</span>
         </div>
         <NavLinks />
-        <div className="border-t p-4">
+        <div className="border-t border-sidebar-border p-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="w-full justify-start gap-2 px-2">
-                <Avatar className="h-6 w-6">
-                  <AvatarFallback className="text-[10px] bg-primary/10 text-primary">{initials}</AvatarFallback>
+              <Button variant="ghost" className="w-full justify-start gap-2 px-2 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
+                <Avatar className="h-7 w-7">
+                  <AvatarFallback className="text-[10px] bg-sidebar-primary text-sidebar-primary-foreground">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col items-start text-left flex-1 overflow-hidden">
                   <span className="text-sm font-medium leading-none truncate w-full">{user.displayName}</span>
-                  <span className="text-xs text-muted-foreground leading-none mt-1 truncate w-full">{user.role.replace('_', ' ')}</span>
+                  <span className="text-xs text-sidebar-foreground/60 leading-none mt-1 truncate w-full">{user.role.replace('_', ' ')}</span>
                 </div>
               </Button>
             </DropdownMenuTrigger>
@@ -167,24 +167,24 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Mobile Topbar */}
       <div className="flex flex-col flex-1 min-w-0">
-        <header className="flex h-14 items-center gap-4 border-b bg-card px-4 md:hidden">
+        <header className="flex h-14 items-center gap-4 border-b bg-sidebar text-sidebar-foreground px-4 md:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="shrink-0">
+              <Button variant="ghost" size="icon" className="shrink-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-64 p-0 flex flex-col">
-              <div className="flex h-14 items-center border-b px-6">
-                <div className="flex items-center gap-2 font-bold text-primary">
-                  <Briefcase className="h-5 w-5" />
-                  <span>Workforce Intel</span>
-                </div>
+            <SheetContent side="left" className="w-64 p-0 flex flex-col bg-sidebar text-sidebar-foreground border-sidebar-border">
+              <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-6">
+                <Wordmark variant="white" className="h-5" />
+                <span className="h-4 w-px bg-sidebar-border" />
+                <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sidebar-foreground/60">HRBP</span>
               </div>
               <NavLinks />
             </SheetContent>
           </Sheet>
+          <Wordmark variant="white" className="h-4" />
           <div className="flex flex-1 items-center justify-end">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
