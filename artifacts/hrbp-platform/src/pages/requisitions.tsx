@@ -2,11 +2,12 @@ import { useState } from "react";
 import { useListRequisitions, useDeleteRequisition, getListRequisitionsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Loader2, Plus, Search, Trash2 } from "lucide-react";
+import { Loader2, Plus, Search, Trash2, Edit } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
@@ -52,10 +53,12 @@ export default function RequisitionsList() {
           <h2 className="text-3xl font-bold tracking-tight text-foreground">Requisitions</h2>
           <p className="text-muted-foreground">Manage open roles and hiring</p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Requisition
-        </Button>
+        <Link href="/requisitions/new">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Requisition
+          </Button>
+        </Link>
       </div>
 
       <Card>
@@ -107,9 +110,16 @@ export default function RequisitionsList() {
                         <TableCell>{getStatusBadge(req.status)}</TableCell>
                         <TableCell>{format(new Date(req.openedDate), "PP")}</TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="icon" onClick={() => handleDelete(req.id)} className="text-destructive">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <div className="flex justify-end gap-2">
+                            <Link href={`/requisitions/${req.id}`}>
+                              <Button variant="ghost" size="icon">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                            <Button variant="ghost" size="icon" onClick={() => handleDelete(req.id)} className="text-destructive">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))

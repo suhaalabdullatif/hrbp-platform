@@ -7,11 +7,12 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 import { businessUnitsTable } from "./businessUnits";
+import { employeesTable } from "./employees";
 
 export const erCasesTable = pgTable("er_cases", {
   id: serial("id").primaryKey(),
   caseNumber: text("case_number").notNull().unique(),
-  employeeId: integer("employee_id"),
+  employeeId: integer("employee_id").references(() => employeesTable.id),
   businessUnitId: integer("business_unit_id")
     .notNull()
     .references(() => businessUnitsTable.id),

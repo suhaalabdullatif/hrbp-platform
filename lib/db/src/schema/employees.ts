@@ -6,6 +6,7 @@ import {
   integer,
   date,
   timestamp,
+  type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { businessUnitsTable } from "./businessUnits";
 
@@ -24,7 +25,7 @@ export const employeesTable = pgTable("employees", {
   employmentStatus: text("employment_status").notNull(),
   hireDate: date("hire_date", { mode: "string" }).notNull(),
   terminationDate: date("termination_date", { mode: "string" }),
-  managerId: integer("manager_id"),
+  managerId: integer("manager_id").references((): AnyPgColumn => employeesTable.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()

@@ -2,11 +2,12 @@ import { useState } from "react";
 import { useListErCases, useDeleteErCase, getListErCasesQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Loader2, Plus, Search, Trash2 } from "lucide-react";
+import { Loader2, Plus, Search, Trash2, Edit } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
@@ -50,10 +51,12 @@ export default function ErCasesList() {
           <h2 className="text-3xl font-bold tracking-tight text-foreground">Employee Relations</h2>
           <p className="text-muted-foreground">Manage active cases and incidents</p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Log Case
-        </Button>
+        <Link href="/er-cases/new">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Log Case
+          </Button>
+        </Link>
       </div>
 
       <Card>
@@ -103,9 +106,16 @@ export default function ErCasesList() {
                         <TableCell>{getStatusBadge(c.status)}</TableCell>
                         <TableCell>{format(new Date(c.openedDate), "PP")}</TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="icon" onClick={() => handleDelete(c.id)} className="text-destructive">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <div className="flex justify-end gap-2">
+                            <Link href={`/er-cases/${c.id}`}>
+                              <Button variant="ghost" size="icon">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                            <Button variant="ghost" size="icon" onClick={() => handleDelete(c.id)} className="text-destructive">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))

@@ -12,10 +12,15 @@ import Comparison from "@/pages/comparison";
 import EmployeesList from "@/pages/employees";
 import EmployeeDetail from "@/pages/employee-detail";
 import RequisitionsList from "@/pages/requisitions";
+import RequisitionDetail from "@/pages/requisition-detail";
 import ErCasesList from "@/pages/er-cases";
+import ErCaseDetail from "@/pages/er-case-detail";
 import AttritionList from "@/pages/attrition";
+import AttritionDetail from "@/pages/attrition-detail";
 import ProbationList from "@/pages/probation";
+import ProbationDetail from "@/pages/probation-detail";
 import UsersList from "@/pages/users";
+import UserDetail from "@/pages/user-detail";
 import AuditLog from "@/pages/audit";
 
 const queryClient = new QueryClient({
@@ -37,10 +42,19 @@ function ProtectedRouter() {
         <Route path="/employees/new" component={EmployeeDetail} />
         <Route path="/employees/:id" component={EmployeeDetail} />
         <Route path="/requisitions" component={RequisitionsList} />
+        <Route path="/requisitions/new" component={RequisitionDetail} />
+        <Route path="/requisitions/:id" component={RequisitionDetail} />
         <Route path="/er-cases" component={ErCasesList} />
+        <Route path="/er-cases/new" component={ErCaseDetail} />
+        <Route path="/er-cases/:id" component={ErCaseDetail} />
         <Route path="/attrition" component={AttritionList} />
+        <Route path="/attrition/new" component={AttritionDetail} />
         <Route path="/probation" component={ProbationList} />
+        <Route path="/probation/new" component={ProbationDetail} />
+        <Route path="/probation/:id" component={ProbationDetail} />
         <Route path="/admin/users" component={UsersList} />
+        <Route path="/admin/users/new" component={UserDetail} />
+        <Route path="/admin/users/:id" component={UserDetail} />
         <Route path="/audit" component={AuditLog} />
         <Route component={NotFound} />
       </Switch>

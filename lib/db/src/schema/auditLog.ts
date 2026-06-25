@@ -1,8 +1,9 @@
 import { pgTable, serial, text, integer, jsonb, timestamp } from "drizzle-orm/pg-core";
+import { usersTable } from "./users";
 
 export const auditLogTable = pgTable("audit_log", {
   id: serial("id").primaryKey(),
-  actorUserId: integer("actor_user_id"),
+  actorUserId: integer("actor_user_id").references(() => usersTable.id),
   actorName: text("actor_name"),
   action: text("action").notNull(),
   entityType: text("entity_type").notNull(),

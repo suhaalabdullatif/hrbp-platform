@@ -268,7 +268,7 @@ async function main() {
         businessUnitId: e.businessUnitId,
         startDate: e.hireDate,
         endDate: ymd(end),
-        status: "completed",
+        status: "passed",
         reviewDate: ymd(end),
         outcome: "confirmed",
       });

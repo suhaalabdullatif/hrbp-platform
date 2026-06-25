@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
@@ -37,10 +38,12 @@ export default function AttritionList() {
           <h2 className="text-3xl font-bold tracking-tight text-foreground">Attrition</h2>
           <p className="text-muted-foreground">Track employee departures and exit data</p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Log Exit
-        </Button>
+        <Link href="/attrition/new">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Log Exit
+          </Button>
+        </Link>
       </div>
 
       <Card>

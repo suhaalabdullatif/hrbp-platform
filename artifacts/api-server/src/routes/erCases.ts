@@ -169,6 +169,20 @@ router.patch("/er-cases/:id", requireAuth, async (req, res): Promise<void> => {
     return;
   }
 
+  if (parsed.data.employeeId != null) {
+    const targetBu = parsed.data.businessUnitId ?? existing.r.businessUnitId;
+    const [emp] = await db
+      .select({ businessUnitId: employeesTable.businessUnitId })
+      .from(employeesTable)
+      .where(eq(employeesTable.id, parsed.data.employeeId));
+    if (!emp || emp.businessUnitId !== targetBu) {
+      res.status(400).json({
+        error: "Employee does not belong to the specified business unit",
+      });
+      return;
+    }
+  }
+
   const [updated] = await db
     .update(erCasesTable)
     .set(parsed.data)
