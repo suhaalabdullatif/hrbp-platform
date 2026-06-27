@@ -5,23 +5,16 @@
  * Enterprise HRBP Platform API
  * OpenAPI spec version: 0.1.0
  */
-import type { ProbationStatus } from './probationStatus';
-export interface Probation {
-    id: number;
+import type { ProbationInputStatus } from './probationInputStatus';
+export interface ProbationInput {
     employeeId: number;
-    /** @nullable */
-    employeeName?: string | null;
     businessUnitId: number;
-    /** @nullable */
-    businessUnitName?: string | null;
     startDate: string;
     endDate: string;
-    status: ProbationStatus;
+    status: ProbationInputStatus;
     /** @nullable */
     reviewDate?: string | null;
     /** @nullable */
     outcome?: string | null;
-    createdAt: string;
-    updatedAt: string;
 }
-//# sourceMappingURL=probation.d.ts.map
+//# sourceMappingURL=probationInput.d.ts.map
