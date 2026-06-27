@@ -1,10 +1,10 @@
-export declare const attritionTable: import("drizzle-orm/pg-core").PgTableWithColumns<{
-    name: "attrition";
+export declare const auditLogTable: import("drizzle-orm/pg-core").PgTableWithColumns<{
+    name: "audit_log";
     schema: undefined;
     columns: {
         id: import("drizzle-orm/pg-core").PgColumn<{
             name: "id";
-            tableName: "attrition";
+            tableName: "audit_log";
             dataType: "number";
             columnType: "PgSerial";
             data: number;
@@ -19,14 +19,14 @@ export declare const attritionTable: import("drizzle-orm/pg-core").PgTableWithCo
             identity: undefined;
             generated: undefined;
         }, {}, {}>;
-        employeeId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "employee_id";
-            tableName: "attrition";
+        actorUserId: import("drizzle-orm/pg-core").PgColumn<{
+            name: "actor_user_id";
+            tableName: "audit_log";
             dataType: "number";
             columnType: "PgInteger";
             data: number;
             driverParam: string | number;
-            notNull: true;
+            notNull: false;
             hasDefault: false;
             isPrimaryKey: false;
             isAutoincrement: false;
@@ -36,43 +36,9 @@ export declare const attritionTable: import("drizzle-orm/pg-core").PgTableWithCo
             identity: undefined;
             generated: undefined;
         }, {}, {}>;
-        businessUnitId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "business_unit_id";
-            tableName: "attrition";
-            dataType: "number";
-            columnType: "PgInteger";
-            data: number;
-            driverParam: string | number;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        attritionType: import("drizzle-orm/pg-core").PgColumn<{
-            name: "attrition_type";
-            tableName: "attrition";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        reason: import("drizzle-orm/pg-core").PgColumn<{
-            name: "reason";
-            tableName: "attrition";
+        actorName: import("drizzle-orm/pg-core").PgColumn<{
+            name: "actor_name";
+            tableName: "audit_log";
             dataType: "string";
             columnType: "PgText";
             data: string;
@@ -87,13 +53,47 @@ export declare const attritionTable: import("drizzle-orm/pg-core").PgTableWithCo
             identity: undefined;
             generated: undefined;
         }, {}, {}>;
-        exitDate: import("drizzle-orm/pg-core").PgColumn<{
-            name: "exit_date";
-            tableName: "attrition";
+        action: import("drizzle-orm/pg-core").PgColumn<{
+            name: "action";
+            tableName: "audit_log";
             dataType: "string";
-            columnType: "PgDateString";
+            columnType: "PgText";
             data: string;
             driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        entityType: import("drizzle-orm/pg-core").PgColumn<{
+            name: "entity_type";
+            tableName: "audit_log";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        entityId: import("drizzle-orm/pg-core").PgColumn<{
+            name: "entity_id";
+            tableName: "audit_log";
+            dataType: "number";
+            columnType: "PgInteger";
+            data: number;
+            driverParam: string | number;
             notNull: true;
             hasDefault: false;
             isPrimaryKey: false;
@@ -104,9 +104,28 @@ export declare const attritionTable: import("drizzle-orm/pg-core").PgTableWithCo
             identity: undefined;
             generated: undefined;
         }, {}, {}>;
+        changes: import("drizzle-orm/pg-core").PgColumn<{
+            name: "changes";
+            tableName: "audit_log";
+            dataType: "json";
+            columnType: "PgJsonb";
+            data: Record<string, unknown> | null;
+            driverParam: unknown;
+            notNull: false;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {
+            $type: Record<string, unknown> | null;
+        }>;
         createdAt: import("drizzle-orm/pg-core").PgColumn<{
             name: "created_at";
-            tableName: "attrition";
+            tableName: "audit_log";
             dataType: "date";
             columnType: "PgTimestamp";
             data: Date;
@@ -124,6 +143,6 @@ export declare const attritionTable: import("drizzle-orm/pg-core").PgTableWithCo
     };
     dialect: "pg";
 }>;
-export type Attrition = typeof attritionTable.$inferSelect;
-export type InsertAttrition = typeof attritionTable.$inferInsert;
-//# sourceMappingURL=attrition.d.ts.map
+export type AuditLogEntry = typeof auditLogTable.$inferSelect;
+export type InsertAuditLogEntry = typeof auditLogTable.$inferInsert;
+//# sourceMappingURL=auditLog.d.ts.map

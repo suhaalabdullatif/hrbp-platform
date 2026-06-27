@@ -1,10 +1,10 @@
-export declare const probationTable: import("drizzle-orm/pg-core").PgTableWithColumns<{
-    name: "probation";
+export declare const erCasesTable: import("drizzle-orm/pg-core").PgTableWithColumns<{
+    name: "er_cases";
     schema: undefined;
     columns: {
         id: import("drizzle-orm/pg-core").PgColumn<{
             name: "id";
-            tableName: "probation";
+            tableName: "er_cases";
             dataType: "number";
             columnType: "PgSerial";
             data: number;
@@ -19,77 +19,9 @@ export declare const probationTable: import("drizzle-orm/pg-core").PgTableWithCo
             identity: undefined;
             generated: undefined;
         }, {}, {}>;
-        employeeId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "employee_id";
-            tableName: "probation";
-            dataType: "number";
-            columnType: "PgInteger";
-            data: number;
-            driverParam: string | number;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        businessUnitId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "business_unit_id";
-            tableName: "probation";
-            dataType: "number";
-            columnType: "PgInteger";
-            data: number;
-            driverParam: string | number;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        startDate: import("drizzle-orm/pg-core").PgColumn<{
-            name: "start_date";
-            tableName: "probation";
-            dataType: "string";
-            columnType: "PgDateString";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        endDate: import("drizzle-orm/pg-core").PgColumn<{
-            name: "end_date";
-            tableName: "probation";
-            dataType: "string";
-            columnType: "PgDateString";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        status: import("drizzle-orm/pg-core").PgColumn<{
-            name: "status";
-            tableName: "probation";
+        caseNumber: import("drizzle-orm/pg-core").PgColumn<{
+            name: "case_number";
+            tableName: "er_cases";
             dataType: "string";
             columnType: "PgText";
             data: string;
@@ -104,9 +36,111 @@ export declare const probationTable: import("drizzle-orm/pg-core").PgTableWithCo
             identity: undefined;
             generated: undefined;
         }, {}, {}>;
-        reviewDate: import("drizzle-orm/pg-core").PgColumn<{
-            name: "review_date";
-            tableName: "probation";
+        employeeId: import("drizzle-orm/pg-core").PgColumn<{
+            name: "employee_id";
+            tableName: "er_cases";
+            dataType: "number";
+            columnType: "PgInteger";
+            data: number;
+            driverParam: string | number;
+            notNull: false;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        businessUnitId: import("drizzle-orm/pg-core").PgColumn<{
+            name: "business_unit_id";
+            tableName: "er_cases";
+            dataType: "number";
+            columnType: "PgInteger";
+            data: number;
+            driverParam: string | number;
+            notNull: true;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        caseType: import("drizzle-orm/pg-core").PgColumn<{
+            name: "case_type";
+            tableName: "er_cases";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        severity: import("drizzle-orm/pg-core").PgColumn<{
+            name: "severity";
+            tableName: "er_cases";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        status: import("drizzle-orm/pg-core").PgColumn<{
+            name: "status";
+            tableName: "er_cases";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        openedDate: import("drizzle-orm/pg-core").PgColumn<{
+            name: "opened_date";
+            tableName: "er_cases";
+            dataType: "string";
+            columnType: "PgDateString";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        closedDate: import("drizzle-orm/pg-core").PgColumn<{
+            name: "closed_date";
+            tableName: "er_cases";
             dataType: "string";
             columnType: "PgDateString";
             data: string;
@@ -121,9 +155,9 @@ export declare const probationTable: import("drizzle-orm/pg-core").PgTableWithCo
             identity: undefined;
             generated: undefined;
         }, {}, {}>;
-        outcome: import("drizzle-orm/pg-core").PgColumn<{
-            name: "outcome";
-            tableName: "probation";
+        summary: import("drizzle-orm/pg-core").PgColumn<{
+            name: "summary";
+            tableName: "er_cases";
             dataType: "string";
             columnType: "PgText";
             data: string;
@@ -140,7 +174,7 @@ export declare const probationTable: import("drizzle-orm/pg-core").PgTableWithCo
         }, {}, {}>;
         createdAt: import("drizzle-orm/pg-core").PgColumn<{
             name: "created_at";
-            tableName: "probation";
+            tableName: "er_cases";
             dataType: "date";
             columnType: "PgTimestamp";
             data: Date;
@@ -157,7 +191,7 @@ export declare const probationTable: import("drizzle-orm/pg-core").PgTableWithCo
         }, {}, {}>;
         updatedAt: import("drizzle-orm/pg-core").PgColumn<{
             name: "updated_at";
-            tableName: "probation";
+            tableName: "er_cases";
             dataType: "date";
             columnType: "PgTimestamp";
             data: Date;
@@ -175,6 +209,6 @@ export declare const probationTable: import("drizzle-orm/pg-core").PgTableWithCo
     };
     dialect: "pg";
 }>;
-export type Probation = typeof probationTable.$inferSelect;
-export type InsertProbation = typeof probationTable.$inferInsert;
-//# sourceMappingURL=probation.d.ts.map
+export type ErCase = typeof erCasesTable.$inferSelect;
+export type InsertErCase = typeof erCasesTable.$inferInsert;
+//# sourceMappingURL=erCases.d.ts.map

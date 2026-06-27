@@ -5,3514 +5,1117 @@
  * Enterprise HRBP Platform API
  * OpenAPI spec version: 0.1.0
  */
-import {
-  useMutation,
-  useQuery
-} from '@tanstack/react-query';
-import type {
-  MutationFunction,
-  QueryFunction,
-  QueryKey,
-  UseMutationOptions,
-  UseMutationResult,
-  UseQueryOptions,
-  UseQueryResult
-} from '@tanstack/react-query';
+import * as zod from 'zod';
 
-import type {
-  Attrition,
-  AttritionInput,
-  AuditLogEntry,
-  AuthUser,
-  Benchmarking,
-  BusinessUnit,
-  ComparisonRow,
-  Employee,
-  EmployeeInput,
-  EmployeeUpdate,
-  ErCase,
-  ErCaseInput,
-  ErCaseUpdate,
-  Error,
-  ExecutiveInsight,
-  GetDashboardKpisParams,
-  GetDashboardTrendsParams,
-  GetIntelligenceContextParams,
-  GetIntelligenceHealthScoresParams,
-  GetIntelligenceInsightsParams,
-  GetIntelligenceRiskParams,
-  HealthScore,
-  HealthStatus,
-  Kpis,
-  ListAttritionParams,
-  ListAuditLogParams,
-  ListEmployeesParams,
-  ListErCasesParams,
-  ListProbationParams,
-  ListRequisitionsParams,
-  LoginInput,
-  Notification,
-  Persona,
-  Probation,
-  ProbationInput,
-  ProbationUpdate,
-  Requisition,
-  RequisitionInput,
-  RequisitionUpdate,
-  RiskProfile,
-  TrendPoint,
-  User,
-  UserInput,
-  UserUpdate,
-  WorkforceContext
-} from './api.schemas';
-
-import { customFetch } from '../custom-fetch';
-import type { ErrorType , BodyType } from '../custom-fetch';
-
-type AwaitedInput<T> = PromiseLike<T> | T;
-
-      type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
-
-
-type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
-
-
-
-const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
-  const result = { queryKey } as T & { queryKey: K };
-  for (const key of Object.keys(query)) {
-    // The explicit queryKey always wins, matching the previous
-    // `{ ...query, queryKey }` spread where it was set last.
-    if (key === 'queryKey') continue;
-    Object.defineProperty(result, key, {
-      enumerable: true,
-      configurable: true,
-      get: () => (query as Record<string, unknown>)[key],
-    });
-  }
-  return result;
-};
-
-export const getHealthCheckUrl = () => {
-
-
-
-
-  return `/api/healthz`
-}
 
 /**
  * Returns server health status
  * @summary Health check
  */
-export const healthCheck = async ( options?: RequestInit): Promise<HealthStatus> => {
-
-  return customFetch<HealthStatus>(getHealthCheckUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getHealthCheckQueryKey = () => {
-    return [
-    `/api/healthz`
-    ] as const;
-    }
-
-
-export const getHealthCheckQueryOptions = <TData = Awaited<ReturnType<typeof healthCheck>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getHealthCheckQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof healthCheck>>> = ({ signal }) => healthCheck({ signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type HealthCheckQueryResult = NonNullable<Awaited<ReturnType<typeof healthCheck>>>
-export type HealthCheckQueryError = ErrorType<unknown>
-
-
-/**
- * @summary Health check
- */
-
-export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, TError = ErrorType<unknown>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getHealthCheckQueryOptions(options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getListPersonasUrl = () => {
-
-
-
-
-  return `/api/auth/personas`
-}
-
-/**
- * @summary List available dev login personas
- */
-export const listPersonas = async ( options?: RequestInit): Promise<Persona[]> => {
-
-  return customFetch<Persona[]>(getListPersonasUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getListPersonasQueryKey = () => {
-    return [
-    `/api/auth/personas`
-    ] as const;
-    }
-
-
-export const getListPersonasQueryOptions = <TData = Awaited<ReturnType<typeof listPersonas>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listPersonas>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getListPersonasQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listPersonas>>> = ({ signal }) => listPersonas({ signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listPersonas>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type ListPersonasQueryResult = NonNullable<Awaited<ReturnType<typeof listPersonas>>>
-export type ListPersonasQueryError = ErrorType<unknown>
+export const HealthCheckResponse = zod.object({
+  "status": zod.string()
+})
 
 
 /**
  * @summary List available dev login personas
  */
+export const ListPersonasResponseItem = zod.object({
+  "key": zod.string(),
+  "label": zod.string(),
+  "role": zod.string(),
+  "businessUnitNames": zod.array(zod.string())
+})
+export const ListPersonasResponse = zod.array(ListPersonasResponseItem)
 
-export function useListPersonas<TData = Awaited<ReturnType<typeof listPersonas>>, TError = ErrorType<unknown>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listPersonas>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getListPersonasQueryOptions(options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getLoginUrl = () => {
-
-
-
-
-  return `/api/auth/login`
-}
 
 /**
  * @summary Log in as a dev persona
  */
-export const login = async (loginInput: LoginInput, options?: RequestInit): Promise<AuthUser> => {
+export const LoginBody = zod.object({
+  "persona": zod.string()
+})
 
-  return customFetch<AuthUser>(getLoginUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(loginInput)
-  }
-);}
+export const LoginResponse = zod.object({
+  "id": zod.number(),
+  "email": zod.string(),
+  "displayName": zod.string(),
+  "role": zod.string(),
+  "businessUnits": zod.array(zod.object({
+  "id": zod.number(),
+  "name": zod.string()
+}))
+})
 
-
-
-
-export const getLoginMutationOptions = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,{data: BodyType<LoginInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,{data: BodyType<LoginInput>}, TContext> => {
-
-const mutationKey = ['login'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof login>>, {data: BodyType<LoginInput>}> = (props) => {
-          const {data} = props ?? {};
-
-          return  login(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type LoginMutationResult = NonNullable<Awaited<ReturnType<typeof login>>>
-    export type LoginMutationBody = BodyType<LoginInput>
-    export type LoginMutationError = ErrorType<Error>
-
-    /**
- * @summary Log in as a dev persona
- */
-export const useLogin = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,{data: BodyType<LoginInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof login>>,
-        TError,
-        {data: BodyType<LoginInput>},
-        TContext
-      > => {
-      return useMutation(getLoginMutationOptions(options));
-    }
-
-export const getLogoutUrl = () => {
-
-
-
-
-  return `/api/auth/logout`
-}
 
 /**
  * @summary Log out
  */
-export const logout = async ( options?: RequestInit): Promise<void> => {
-
-  return customFetch<void>(getLogoutUrl(),
-  {
-    ...options,
-    method: 'POST'
-
-
-  }
-);}
-
-
-
-
-export const getLogoutMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext> => {
-
-const mutationKey = ['logout'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof logout>>, void> = () => {
-
-
-          return  logout(requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type LogoutMutationResult = NonNullable<Awaited<ReturnType<typeof logout>>>
-
-    export type LogoutMutationError = ErrorType<unknown>
-
-    /**
- * @summary Log out
- */
-export const useLogout = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof logout>>,
-        TError,
-        void,
-        TContext
-      > => {
-      return useMutation(getLogoutMutationOptions(options));
-    }
-
-export const getGetCurrentUserUrl = () => {
-
-
-
-
-  return `/api/auth/me`
-}
-
-/**
- * @summary Get the current authenticated user
- */
-export const getCurrentUser = async ( options?: RequestInit): Promise<AuthUser> => {
-
-  return customFetch<AuthUser>(getGetCurrentUserUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetCurrentUserQueryKey = () => {
-    return [
-    `/api/auth/me`
-    ] as const;
-    }
-
-
-export const getGetCurrentUserQueryOptions = <TData = Awaited<ReturnType<typeof getCurrentUser>>, TError = ErrorType<Error>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetCurrentUserQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCurrentUser>>> = ({ signal }) => getCurrentUser({ signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetCurrentUserQueryResult = NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>
-export type GetCurrentUserQueryError = ErrorType<Error>
+export const LogoutResponse = zod.void()
 
 
 /**
  * @summary Get the current authenticated user
  */
-
-export function useGetCurrentUser<TData = Awaited<ReturnType<typeof getCurrentUser>>, TError = ErrorType<Error>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getGetCurrentUserQueryOptions(options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getListBusinessUnitsUrl = () => {
-
-
-
-
-  return `/api/business-units`
-}
-
-/**
- * @summary List business units in scope
- */
-export const listBusinessUnits = async ( options?: RequestInit): Promise<BusinessUnit[]> => {
-
-  return customFetch<BusinessUnit[]>(getListBusinessUnitsUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getListBusinessUnitsQueryKey = () => {
-    return [
-    `/api/business-units`
-    ] as const;
-    }
-
-
-export const getListBusinessUnitsQueryOptions = <TData = Awaited<ReturnType<typeof listBusinessUnits>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listBusinessUnits>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getListBusinessUnitsQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listBusinessUnits>>> = ({ signal }) => listBusinessUnits({ signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listBusinessUnits>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type ListBusinessUnitsQueryResult = NonNullable<Awaited<ReturnType<typeof listBusinessUnits>>>
-export type ListBusinessUnitsQueryError = ErrorType<unknown>
+export const GetCurrentUserResponse = zod.object({
+  "id": zod.number(),
+  "email": zod.string(),
+  "displayName": zod.string(),
+  "role": zod.string(),
+  "businessUnits": zod.array(zod.object({
+  "id": zod.number(),
+  "name": zod.string()
+}))
+})
 
 
 /**
  * @summary List business units in scope
  */
-
-export function useListBusinessUnits<TData = Awaited<ReturnType<typeof listBusinessUnits>>, TError = ErrorType<unknown>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listBusinessUnits>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getListBusinessUnitsQueryOptions(options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getListEmployeesUrl = (params?: ListEmployeesParams,) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0 ? `/api/employees?${stringifiedParams}` : `/api/employees`
-}
-
-/**
- * @summary List employees in scope
- */
-export const listEmployees = async (params?: ListEmployeesParams, options?: RequestInit): Promise<Employee[]> => {
-
-  return customFetch<Employee[]>(getListEmployeesUrl(params),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getListEmployeesQueryKey = (params?: ListEmployeesParams,) => {
-    return [
-    `/api/employees`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getListEmployeesQueryOptions = <TData = Awaited<ReturnType<typeof listEmployees>>, TError = ErrorType<unknown>>(params?: ListEmployeesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listEmployees>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getListEmployeesQueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listEmployees>>> = ({ signal }) => listEmployees(params, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listEmployees>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type ListEmployeesQueryResult = NonNullable<Awaited<ReturnType<typeof listEmployees>>>
-export type ListEmployeesQueryError = ErrorType<unknown>
+export const ListBusinessUnitsResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "code": zod.string(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const ListBusinessUnitsResponse = zod.array(ListBusinessUnitsResponseItem)
 
 
 /**
  * @summary List employees in scope
  */
+export const ListEmployeesQueryParams = zod.object({
+  "businessUnitId": zod.coerce.number().optional(),
+  "status": zod.coerce.string().optional(),
+  "search": zod.coerce.string().optional()
+})
 
-export function useListEmployees<TData = Awaited<ReturnType<typeof listEmployees>>, TError = ErrorType<unknown>>(
- params?: ListEmployeesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listEmployees>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const ListEmployeesResponseItem = zod.object({
+  "id": zod.number(),
+  "employeeNumber": zod.string(),
+  "fullName": zod.string(),
+  "email": zod.string(),
+  "gender": zod.enum(['M', 'F']),
+  "isSaudi": zod.boolean(),
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string().nullish(),
+  "jobTitle": zod.string(),
+  "grade": zod.string(),
+  "employmentStatus": zod.enum(['active', 'on_probation', 'terminated']),
+  "hireDate": zod.string(),
+  "terminationDate": zod.string().nullish(),
+  "managerId": zod.number().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const ListEmployeesResponse = zod.array(ListEmployeesResponseItem)
 
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getListEmployeesQueryOptions(params,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getCreateEmployeeUrl = () => {
-
-
-
-
-  return `/api/employees`
-}
 
 /**
  * @summary Create an employee
  */
-export const createEmployee = async (employeeInput: EmployeeInput, options?: RequestInit): Promise<Employee> => {
-
-  return customFetch<Employee>(getCreateEmployeeUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(employeeInput)
-  }
-);}
 
 
 
 
-export const getCreateEmployeeMutationOptions = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createEmployee>>, TError,{data: BodyType<EmployeeInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createEmployee>>, TError,{data: BodyType<EmployeeInput>}, TContext> => {
+export const CreateEmployeeBody = zod.object({
+  "employeeNumber": zod.string().min(1),
+  "fullName": zod.string().min(1),
+  "email": zod.string(),
+  "gender": zod.enum(['M', 'F']),
+  "isSaudi": zod.boolean(),
+  "businessUnitId": zod.number(),
+  "jobTitle": zod.string(),
+  "grade": zod.string(),
+  "employmentStatus": zod.enum(['active', 'on_probation', 'terminated']),
+  "hireDate": zod.string(),
+  "terminationDate": zod.string().nullish(),
+  "managerId": zod.number().nullish()
+})
 
-const mutationKey = ['createEmployee'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createEmployee>>, {data: BodyType<EmployeeInput>}> = (props) => {
-          const {data} = props ?? {};
-
-          return  createEmployee(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CreateEmployeeMutationResult = NonNullable<Awaited<ReturnType<typeof createEmployee>>>
-    export type CreateEmployeeMutationBody = BodyType<EmployeeInput>
-    export type CreateEmployeeMutationError = ErrorType<Error>
-
-    /**
- * @summary Create an employee
- */
-export const useCreateEmployee = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createEmployee>>, TError,{data: BodyType<EmployeeInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof createEmployee>>,
-        TError,
-        {data: BodyType<EmployeeInput>},
-        TContext
-      > => {
-      return useMutation(getCreateEmployeeMutationOptions(options));
-    }
-
-export const getGetEmployeeUrl = (id: number,) => {
-
-
-
-
-  return `/api/employees/${id}`
-}
-
-/**
- * @summary Get an employee
- */
-export const getEmployee = async (id: number, options?: RequestInit): Promise<Employee> => {
-
-  return customFetch<Employee>(getGetEmployeeUrl(id),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetEmployeeQueryKey = (id: number,) => {
-    return [
-    `/api/employees/${id}`
-    ] as const;
-    }
-
-
-export const getGetEmployeeQueryOptions = <TData = Awaited<ReturnType<typeof getEmployee>>, TError = ErrorType<Error>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getEmployee>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetEmployeeQueryKey(id);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getEmployee>>> = ({ signal }) => getEmployee(id, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getEmployee>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetEmployeeQueryResult = NonNullable<Awaited<ReturnType<typeof getEmployee>>>
-export type GetEmployeeQueryError = ErrorType<Error>
+export const CreateEmployeeResponse = zod.object({
+  "id": zod.number(),
+  "employeeNumber": zod.string(),
+  "fullName": zod.string(),
+  "email": zod.string(),
+  "gender": zod.enum(['M', 'F']),
+  "isSaudi": zod.boolean(),
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string().nullish(),
+  "jobTitle": zod.string(),
+  "grade": zod.string(),
+  "employmentStatus": zod.enum(['active', 'on_probation', 'terminated']),
+  "hireDate": zod.string(),
+  "terminationDate": zod.string().nullish(),
+  "managerId": zod.number().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
 
 
 /**
  * @summary Get an employee
  */
+export const GetEmployeeParams = zod.object({
+  "id": zod.coerce.number()
+})
 
-export function useGetEmployee<TData = Awaited<ReturnType<typeof getEmployee>>, TError = ErrorType<Error>>(
- id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getEmployee>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const GetEmployeeResponse = zod.object({
+  "id": zod.number(),
+  "employeeNumber": zod.string(),
+  "fullName": zod.string(),
+  "email": zod.string(),
+  "gender": zod.enum(['M', 'F']),
+  "isSaudi": zod.boolean(),
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string().nullish(),
+  "jobTitle": zod.string(),
+  "grade": zod.string(),
+  "employmentStatus": zod.enum(['active', 'on_probation', 'terminated']),
+  "hireDate": zod.string(),
+  "terminationDate": zod.string().nullish(),
+  "managerId": zod.number().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
 
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getGetEmployeeQueryOptions(id,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getUpdateEmployeeUrl = (id: number,) => {
-
-
-
-
-  return `/api/employees/${id}`
-}
 
 /**
  * @summary Update an employee
  */
-export const updateEmployee = async (id: number,
-    employeeUpdate: EmployeeUpdate, options?: RequestInit): Promise<Employee> => {
-
-  return customFetch<Employee>(getUpdateEmployeeUrl(id),
-  {
-    ...options,
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(employeeUpdate)
-  }
-);}
-
-
-
-
-export const getUpdateEmployeeMutationOptions = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateEmployee>>, TError,{id: number;data: BodyType<EmployeeUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof updateEmployee>>, TError,{id: number;data: BodyType<EmployeeUpdate>}, TContext> => {
-
-const mutationKey = ['updateEmployee'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateEmployee>>, {id: number;data: BodyType<EmployeeUpdate>}> = (props) => {
-          const {id,data} = props ?? {};
-
-          return  updateEmployee(id,data,requestOptions)
-        }
+export const UpdateEmployeeParams = zod.object({
+  "id": zod.coerce.number()
+})
 
 
 
 
 
+export const UpdateEmployeeBody = zod.object({
+  "employeeNumber": zod.string().min(1).optional(),
+  "fullName": zod.string().min(1).optional(),
+  "email": zod.string().optional(),
+  "gender": zod.enum(['M', 'F']).optional(),
+  "isSaudi": zod.boolean().optional(),
+  "businessUnitId": zod.number().optional(),
+  "jobTitle": zod.string().optional(),
+  "grade": zod.string().optional(),
+  "employmentStatus": zod.enum(['active', 'on_probation', 'terminated']).optional(),
+  "hireDate": zod.string().optional(),
+  "terminationDate": zod.string().nullish(),
+  "managerId": zod.number().nullish()
+})
 
-  return  { mutationFn, ...mutationOptions }}
+export const UpdateEmployeeResponse = zod.object({
+  "id": zod.number(),
+  "employeeNumber": zod.string(),
+  "fullName": zod.string(),
+  "email": zod.string(),
+  "gender": zod.enum(['M', 'F']),
+  "isSaudi": zod.boolean(),
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string().nullish(),
+  "jobTitle": zod.string(),
+  "grade": zod.string(),
+  "employmentStatus": zod.enum(['active', 'on_probation', 'terminated']),
+  "hireDate": zod.string(),
+  "terminationDate": zod.string().nullish(),
+  "managerId": zod.number().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
 
-    export type UpdateEmployeeMutationResult = NonNullable<Awaited<ReturnType<typeof updateEmployee>>>
-    export type UpdateEmployeeMutationBody = BodyType<EmployeeUpdate>
-    export type UpdateEmployeeMutationError = ErrorType<Error>
-
-    /**
- * @summary Update an employee
- */
-export const useUpdateEmployee = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateEmployee>>, TError,{id: number;data: BodyType<EmployeeUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof updateEmployee>>,
-        TError,
-        {id: number;data: BodyType<EmployeeUpdate>},
-        TContext
-      > => {
-      return useMutation(getUpdateEmployeeMutationOptions(options));
-    }
-
-export const getDeleteEmployeeUrl = (id: number,) => {
-
-
-
-
-  return `/api/employees/${id}`
-}
 
 /**
  * @summary Delete an employee
  */
-export const deleteEmployee = async (id: number, options?: RequestInit): Promise<void> => {
+export const DeleteEmployeeParams = zod.object({
+  "id": zod.coerce.number()
+})
 
-  return customFetch<void>(getDeleteEmployeeUrl(id),
-  {
-    ...options,
-    method: 'DELETE'
-
-
-  }
-);}
-
-
-
-
-export const getDeleteEmployeeMutationOptions = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteEmployee>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteEmployee>>, TError,{id: number}, TContext> => {
-
-const mutationKey = ['deleteEmployee'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteEmployee>>, {id: number}> = (props) => {
-          const {id} = props ?? {};
-
-          return  deleteEmployee(id,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteEmployeeMutationResult = NonNullable<Awaited<ReturnType<typeof deleteEmployee>>>
-
-    export type DeleteEmployeeMutationError = ErrorType<Error>
-
-    /**
- * @summary Delete an employee
- */
-export const useDeleteEmployee = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteEmployee>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof deleteEmployee>>,
-        TError,
-        {id: number},
-        TContext
-      > => {
-      return useMutation(getDeleteEmployeeMutationOptions(options));
-    }
-
-export const getListRequisitionsUrl = (params?: ListRequisitionsParams,) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0 ? `/api/requisitions?${stringifiedParams}` : `/api/requisitions`
-}
-
-/**
- * @summary List requisitions in scope
- */
-export const listRequisitions = async (params?: ListRequisitionsParams, options?: RequestInit): Promise<Requisition[]> => {
-
-  return customFetch<Requisition[]>(getListRequisitionsUrl(params),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getListRequisitionsQueryKey = (params?: ListRequisitionsParams,) => {
-    return [
-    `/api/requisitions`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getListRequisitionsQueryOptions = <TData = Awaited<ReturnType<typeof listRequisitions>>, TError = ErrorType<unknown>>(params?: ListRequisitionsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRequisitions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getListRequisitionsQueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listRequisitions>>> = ({ signal }) => listRequisitions(params, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listRequisitions>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type ListRequisitionsQueryResult = NonNullable<Awaited<ReturnType<typeof listRequisitions>>>
-export type ListRequisitionsQueryError = ErrorType<unknown>
+export const DeleteEmployeeResponse = zod.void()
 
 
 /**
  * @summary List requisitions in scope
  */
+export const ListRequisitionsQueryParams = zod.object({
+  "businessUnitId": zod.coerce.number().optional(),
+  "status": zod.coerce.string().optional()
+})
 
-export function useListRequisitions<TData = Awaited<ReturnType<typeof listRequisitions>>, TError = ErrorType<unknown>>(
- params?: ListRequisitionsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRequisitions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const ListRequisitionsResponseItem = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string().nullish(),
+  "status": zod.enum(['open', 'on_hold', 'filled', 'cancelled']),
+  "grade": zod.string(),
+  "openedDate": zod.string(),
+  "targetCloseDate": zod.string().nullish(),
+  "filledDate": zod.string().nullish(),
+  "recruiter": zod.string(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const ListRequisitionsResponse = zod.array(ListRequisitionsResponseItem)
 
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getListRequisitionsQueryOptions(params,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getCreateRequisitionUrl = () => {
-
-
-
-
-  return `/api/requisitions`
-}
 
 /**
  * @summary Create a requisition
  */
-export const createRequisition = async (requisitionInput: RequisitionInput, options?: RequestInit): Promise<Requisition> => {
-
-  return customFetch<Requisition>(getCreateRequisitionUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(requisitionInput)
-  }
-);}
 
 
 
+export const CreateRequisitionBody = zod.object({
+  "title": zod.string().min(1),
+  "businessUnitId": zod.number(),
+  "status": zod.enum(['open', 'on_hold', 'filled', 'cancelled']),
+  "grade": zod.string(),
+  "openedDate": zod.string(),
+  "targetCloseDate": zod.string().nullish(),
+  "filledDate": zod.string().nullish(),
+  "recruiter": zod.string()
+})
 
-export const getCreateRequisitionMutationOptions = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRequisition>>, TError,{data: BodyType<RequisitionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createRequisition>>, TError,{data: BodyType<RequisitionInput>}, TContext> => {
-
-const mutationKey = ['createRequisition'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createRequisition>>, {data: BodyType<RequisitionInput>}> = (props) => {
-          const {data} = props ?? {};
-
-          return  createRequisition(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CreateRequisitionMutationResult = NonNullable<Awaited<ReturnType<typeof createRequisition>>>
-    export type CreateRequisitionMutationBody = BodyType<RequisitionInput>
-    export type CreateRequisitionMutationError = ErrorType<Error>
-
-    /**
- * @summary Create a requisition
- */
-export const useCreateRequisition = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRequisition>>, TError,{data: BodyType<RequisitionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof createRequisition>>,
-        TError,
-        {data: BodyType<RequisitionInput>},
-        TContext
-      > => {
-      return useMutation(getCreateRequisitionMutationOptions(options));
-    }
-
-export const getGetRequisitionUrl = (id: number,) => {
-
-
-
-
-  return `/api/requisitions/${id}`
-}
-
-/**
- * @summary Get a requisition
- */
-export const getRequisition = async (id: number, options?: RequestInit): Promise<Requisition> => {
-
-  return customFetch<Requisition>(getGetRequisitionUrl(id),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetRequisitionQueryKey = (id: number,) => {
-    return [
-    `/api/requisitions/${id}`
-    ] as const;
-    }
-
-
-export const getGetRequisitionQueryOptions = <TData = Awaited<ReturnType<typeof getRequisition>>, TError = ErrorType<Error>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRequisition>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetRequisitionQueryKey(id);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRequisition>>> = ({ signal }) => getRequisition(id, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRequisition>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetRequisitionQueryResult = NonNullable<Awaited<ReturnType<typeof getRequisition>>>
-export type GetRequisitionQueryError = ErrorType<Error>
+export const CreateRequisitionResponse = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string().nullish(),
+  "status": zod.enum(['open', 'on_hold', 'filled', 'cancelled']),
+  "grade": zod.string(),
+  "openedDate": zod.string(),
+  "targetCloseDate": zod.string().nullish(),
+  "filledDate": zod.string().nullish(),
+  "recruiter": zod.string(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
 
 
 /**
  * @summary Get a requisition
  */
+export const GetRequisitionParams = zod.object({
+  "id": zod.coerce.number()
+})
 
-export function useGetRequisition<TData = Awaited<ReturnType<typeof getRequisition>>, TError = ErrorType<Error>>(
- id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRequisition>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const GetRequisitionResponse = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string().nullish(),
+  "status": zod.enum(['open', 'on_hold', 'filled', 'cancelled']),
+  "grade": zod.string(),
+  "openedDate": zod.string(),
+  "targetCloseDate": zod.string().nullish(),
+  "filledDate": zod.string().nullish(),
+  "recruiter": zod.string(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
 
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getGetRequisitionQueryOptions(id,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getUpdateRequisitionUrl = (id: number,) => {
-
-
-
-
-  return `/api/requisitions/${id}`
-}
 
 /**
  * @summary Update a requisition
  */
-export const updateRequisition = async (id: number,
-    requisitionUpdate: RequisitionUpdate, options?: RequestInit): Promise<Requisition> => {
-
-  return customFetch<Requisition>(getUpdateRequisitionUrl(id),
-  {
-    ...options,
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(requisitionUpdate)
-  }
-);}
+export const UpdateRequisitionParams = zod.object({
+  "id": zod.coerce.number()
+})
 
 
 
 
-export const getUpdateRequisitionMutationOptions = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRequisition>>, TError,{id: number;data: BodyType<RequisitionUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof updateRequisition>>, TError,{id: number;data: BodyType<RequisitionUpdate>}, TContext> => {
+export const UpdateRequisitionBody = zod.object({
+  "title": zod.string().min(1).optional(),
+  "businessUnitId": zod.number().optional(),
+  "status": zod.enum(['open', 'on_hold', 'filled', 'cancelled']).optional(),
+  "grade": zod.string().optional(),
+  "openedDate": zod.string().optional(),
+  "targetCloseDate": zod.string().nullish(),
+  "filledDate": zod.string().nullish(),
+  "recruiter": zod.string().optional()
+})
 
-const mutationKey = ['updateRequisition'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
+export const UpdateRequisitionResponse = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string().nullish(),
+  "status": zod.enum(['open', 'on_hold', 'filled', 'cancelled']),
+  "grade": zod.string(),
+  "openedDate": zod.string(),
+  "targetCloseDate": zod.string().nullish(),
+  "filledDate": zod.string().nullish(),
+  "recruiter": zod.string(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
 
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateRequisition>>, {id: number;data: BodyType<RequisitionUpdate>}> = (props) => {
-          const {id,data} = props ?? {};
-
-          return  updateRequisition(id,data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UpdateRequisitionMutationResult = NonNullable<Awaited<ReturnType<typeof updateRequisition>>>
-    export type UpdateRequisitionMutationBody = BodyType<RequisitionUpdate>
-    export type UpdateRequisitionMutationError = ErrorType<Error>
-
-    /**
- * @summary Update a requisition
- */
-export const useUpdateRequisition = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRequisition>>, TError,{id: number;data: BodyType<RequisitionUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof updateRequisition>>,
-        TError,
-        {id: number;data: BodyType<RequisitionUpdate>},
-        TContext
-      > => {
-      return useMutation(getUpdateRequisitionMutationOptions(options));
-    }
-
-export const getDeleteRequisitionUrl = (id: number,) => {
-
-
-
-
-  return `/api/requisitions/${id}`
-}
 
 /**
  * @summary Delete a requisition
  */
-export const deleteRequisition = async (id: number, options?: RequestInit): Promise<void> => {
+export const DeleteRequisitionParams = zod.object({
+  "id": zod.coerce.number()
+})
 
-  return customFetch<void>(getDeleteRequisitionUrl(id),
-  {
-    ...options,
-    method: 'DELETE'
-
-
-  }
-);}
-
-
-
-
-export const getDeleteRequisitionMutationOptions = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteRequisition>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteRequisition>>, TError,{id: number}, TContext> => {
-
-const mutationKey = ['deleteRequisition'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteRequisition>>, {id: number}> = (props) => {
-          const {id} = props ?? {};
-
-          return  deleteRequisition(id,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteRequisitionMutationResult = NonNullable<Awaited<ReturnType<typeof deleteRequisition>>>
-
-    export type DeleteRequisitionMutationError = ErrorType<Error>
-
-    /**
- * @summary Delete a requisition
- */
-export const useDeleteRequisition = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteRequisition>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof deleteRequisition>>,
-        TError,
-        {id: number},
-        TContext
-      > => {
-      return useMutation(getDeleteRequisitionMutationOptions(options));
-    }
-
-export const getListErCasesUrl = (params?: ListErCasesParams,) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0 ? `/api/er-cases?${stringifiedParams}` : `/api/er-cases`
-}
-
-/**
- * @summary List ER cases in scope
- */
-export const listErCases = async (params?: ListErCasesParams, options?: RequestInit): Promise<ErCase[]> => {
-
-  return customFetch<ErCase[]>(getListErCasesUrl(params),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getListErCasesQueryKey = (params?: ListErCasesParams,) => {
-    return [
-    `/api/er-cases`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getListErCasesQueryOptions = <TData = Awaited<ReturnType<typeof listErCases>>, TError = ErrorType<unknown>>(params?: ListErCasesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listErCases>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getListErCasesQueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listErCases>>> = ({ signal }) => listErCases(params, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listErCases>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type ListErCasesQueryResult = NonNullable<Awaited<ReturnType<typeof listErCases>>>
-export type ListErCasesQueryError = ErrorType<unknown>
+export const DeleteRequisitionResponse = zod.void()
 
 
 /**
  * @summary List ER cases in scope
  */
+export const ListErCasesQueryParams = zod.object({
+  "businessUnitId": zod.coerce.number().optional(),
+  "status": zod.coerce.string().optional()
+})
 
-export function useListErCases<TData = Awaited<ReturnType<typeof listErCases>>, TError = ErrorType<unknown>>(
- params?: ListErCasesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listErCases>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const ListErCasesResponseItem = zod.object({
+  "id": zod.number(),
+  "caseNumber": zod.string(),
+  "employeeId": zod.number().nullish(),
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string().nullish(),
+  "caseType": zod.string(),
+  "severity": zod.enum(['low', 'medium', 'high']),
+  "status": zod.enum(['open', 'in_progress', 'closed']),
+  "openedDate": zod.string(),
+  "closedDate": zod.string().nullish(),
+  "summary": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const ListErCasesResponse = zod.array(ListErCasesResponseItem)
 
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getListErCasesQueryOptions(params,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getCreateErCaseUrl = () => {
-
-
-
-
-  return `/api/er-cases`
-}
 
 /**
  * @summary Create an ER case
  */
-export const createErCase = async (erCaseInput: ErCaseInput, options?: RequestInit): Promise<ErCase> => {
-
-  return customFetch<ErCase>(getCreateErCaseUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(erCaseInput)
-  }
-);}
 
 
 
+export const CreateErCaseBody = zod.object({
+  "caseNumber": zod.string().min(1),
+  "employeeId": zod.number().nullish(),
+  "businessUnitId": zod.number(),
+  "caseType": zod.string(),
+  "severity": zod.enum(['low', 'medium', 'high']),
+  "status": zod.enum(['open', 'in_progress', 'closed']),
+  "openedDate": zod.string(),
+  "closedDate": zod.string().nullish(),
+  "summary": zod.string().nullish()
+})
 
-export const getCreateErCaseMutationOptions = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createErCase>>, TError,{data: BodyType<ErCaseInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createErCase>>, TError,{data: BodyType<ErCaseInput>}, TContext> => {
-
-const mutationKey = ['createErCase'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createErCase>>, {data: BodyType<ErCaseInput>}> = (props) => {
-          const {data} = props ?? {};
-
-          return  createErCase(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CreateErCaseMutationResult = NonNullable<Awaited<ReturnType<typeof createErCase>>>
-    export type CreateErCaseMutationBody = BodyType<ErCaseInput>
-    export type CreateErCaseMutationError = ErrorType<Error>
-
-    /**
- * @summary Create an ER case
- */
-export const useCreateErCase = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createErCase>>, TError,{data: BodyType<ErCaseInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof createErCase>>,
-        TError,
-        {data: BodyType<ErCaseInput>},
-        TContext
-      > => {
-      return useMutation(getCreateErCaseMutationOptions(options));
-    }
-
-export const getGetErCaseUrl = (id: number,) => {
-
-
-
-
-  return `/api/er-cases/${id}`
-}
-
-/**
- * @summary Get an ER case
- */
-export const getErCase = async (id: number, options?: RequestInit): Promise<ErCase> => {
-
-  return customFetch<ErCase>(getGetErCaseUrl(id),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetErCaseQueryKey = (id: number,) => {
-    return [
-    `/api/er-cases/${id}`
-    ] as const;
-    }
-
-
-export const getGetErCaseQueryOptions = <TData = Awaited<ReturnType<typeof getErCase>>, TError = ErrorType<Error>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getErCase>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetErCaseQueryKey(id);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getErCase>>> = ({ signal }) => getErCase(id, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getErCase>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetErCaseQueryResult = NonNullable<Awaited<ReturnType<typeof getErCase>>>
-export type GetErCaseQueryError = ErrorType<Error>
+export const CreateErCaseResponse = zod.object({
+  "id": zod.number(),
+  "caseNumber": zod.string(),
+  "employeeId": zod.number().nullish(),
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string().nullish(),
+  "caseType": zod.string(),
+  "severity": zod.enum(['low', 'medium', 'high']),
+  "status": zod.enum(['open', 'in_progress', 'closed']),
+  "openedDate": zod.string(),
+  "closedDate": zod.string().nullish(),
+  "summary": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
 
 
 /**
  * @summary Get an ER case
  */
+export const GetErCaseParams = zod.object({
+  "id": zod.coerce.number()
+})
 
-export function useGetErCase<TData = Awaited<ReturnType<typeof getErCase>>, TError = ErrorType<Error>>(
- id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getErCase>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const GetErCaseResponse = zod.object({
+  "id": zod.number(),
+  "caseNumber": zod.string(),
+  "employeeId": zod.number().nullish(),
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string().nullish(),
+  "caseType": zod.string(),
+  "severity": zod.enum(['low', 'medium', 'high']),
+  "status": zod.enum(['open', 'in_progress', 'closed']),
+  "openedDate": zod.string(),
+  "closedDate": zod.string().nullish(),
+  "summary": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
 
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getGetErCaseQueryOptions(id,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getUpdateErCaseUrl = (id: number,) => {
-
-
-
-
-  return `/api/er-cases/${id}`
-}
 
 /**
  * @summary Update an ER case
  */
-export const updateErCase = async (id: number,
-    erCaseUpdate: ErCaseUpdate, options?: RequestInit): Promise<ErCase> => {
-
-  return customFetch<ErCase>(getUpdateErCaseUrl(id),
-  {
-    ...options,
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(erCaseUpdate)
-  }
-);}
+export const UpdateErCaseParams = zod.object({
+  "id": zod.coerce.number()
+})
 
 
 
 
-export const getUpdateErCaseMutationOptions = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateErCase>>, TError,{id: number;data: BodyType<ErCaseUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof updateErCase>>, TError,{id: number;data: BodyType<ErCaseUpdate>}, TContext> => {
+export const UpdateErCaseBody = zod.object({
+  "caseNumber": zod.string().min(1).optional(),
+  "employeeId": zod.number().nullish(),
+  "businessUnitId": zod.number().optional(),
+  "caseType": zod.string().optional(),
+  "severity": zod.enum(['low', 'medium', 'high']).optional(),
+  "status": zod.enum(['open', 'in_progress', 'closed']).optional(),
+  "openedDate": zod.string().optional(),
+  "closedDate": zod.string().nullish(),
+  "summary": zod.string().nullish()
+})
 
-const mutationKey = ['updateErCase'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
+export const UpdateErCaseResponse = zod.object({
+  "id": zod.number(),
+  "caseNumber": zod.string(),
+  "employeeId": zod.number().nullish(),
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string().nullish(),
+  "caseType": zod.string(),
+  "severity": zod.enum(['low', 'medium', 'high']),
+  "status": zod.enum(['open', 'in_progress', 'closed']),
+  "openedDate": zod.string(),
+  "closedDate": zod.string().nullish(),
+  "summary": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
 
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateErCase>>, {id: number;data: BodyType<ErCaseUpdate>}> = (props) => {
-          const {id,data} = props ?? {};
-
-          return  updateErCase(id,data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UpdateErCaseMutationResult = NonNullable<Awaited<ReturnType<typeof updateErCase>>>
-    export type UpdateErCaseMutationBody = BodyType<ErCaseUpdate>
-    export type UpdateErCaseMutationError = ErrorType<Error>
-
-    /**
- * @summary Update an ER case
- */
-export const useUpdateErCase = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateErCase>>, TError,{id: number;data: BodyType<ErCaseUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof updateErCase>>,
-        TError,
-        {id: number;data: BodyType<ErCaseUpdate>},
-        TContext
-      > => {
-      return useMutation(getUpdateErCaseMutationOptions(options));
-    }
-
-export const getDeleteErCaseUrl = (id: number,) => {
-
-
-
-
-  return `/api/er-cases/${id}`
-}
 
 /**
  * @summary Delete an ER case
  */
-export const deleteErCase = async (id: number, options?: RequestInit): Promise<void> => {
+export const DeleteErCaseParams = zod.object({
+  "id": zod.coerce.number()
+})
 
-  return customFetch<void>(getDeleteErCaseUrl(id),
-  {
-    ...options,
-    method: 'DELETE'
-
-
-  }
-);}
-
-
-
-
-export const getDeleteErCaseMutationOptions = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteErCase>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteErCase>>, TError,{id: number}, TContext> => {
-
-const mutationKey = ['deleteErCase'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteErCase>>, {id: number}> = (props) => {
-          const {id} = props ?? {};
-
-          return  deleteErCase(id,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteErCaseMutationResult = NonNullable<Awaited<ReturnType<typeof deleteErCase>>>
-
-    export type DeleteErCaseMutationError = ErrorType<Error>
-
-    /**
- * @summary Delete an ER case
- */
-export const useDeleteErCase = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteErCase>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof deleteErCase>>,
-        TError,
-        {id: number},
-        TContext
-      > => {
-      return useMutation(getDeleteErCaseMutationOptions(options));
-    }
-
-export const getListAttritionUrl = (params?: ListAttritionParams,) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0 ? `/api/attrition?${stringifiedParams}` : `/api/attrition`
-}
-
-/**
- * @summary List attrition records in scope
- */
-export const listAttrition = async (params?: ListAttritionParams, options?: RequestInit): Promise<Attrition[]> => {
-
-  return customFetch<Attrition[]>(getListAttritionUrl(params),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getListAttritionQueryKey = (params?: ListAttritionParams,) => {
-    return [
-    `/api/attrition`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getListAttritionQueryOptions = <TData = Awaited<ReturnType<typeof listAttrition>>, TError = ErrorType<unknown>>(params?: ListAttritionParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAttrition>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getListAttritionQueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAttrition>>> = ({ signal }) => listAttrition(params, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAttrition>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type ListAttritionQueryResult = NonNullable<Awaited<ReturnType<typeof listAttrition>>>
-export type ListAttritionQueryError = ErrorType<unknown>
+export const DeleteErCaseResponse = zod.void()
 
 
 /**
  * @summary List attrition records in scope
  */
+export const ListAttritionQueryParams = zod.object({
+  "businessUnitId": zod.coerce.number().optional()
+})
 
-export function useListAttrition<TData = Awaited<ReturnType<typeof listAttrition>>, TError = ErrorType<unknown>>(
- params?: ListAttritionParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAttrition>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const ListAttritionResponseItem = zod.object({
+  "id": zod.number(),
+  "employeeId": zod.number(),
+  "employeeName": zod.string().nullish(),
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string().nullish(),
+  "attritionType": zod.enum(['voluntary', 'involuntary']),
+  "reason": zod.string().nullish(),
+  "exitDate": zod.string(),
+  "createdAt": zod.string()
+})
+export const ListAttritionResponse = zod.array(ListAttritionResponseItem)
 
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getListAttritionQueryOptions(params,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getCreateAttritionUrl = () => {
-
-
-
-
-  return `/api/attrition`
-}
 
 /**
  * @summary Create an attrition record
  */
-export const createAttrition = async (attritionInput: AttritionInput, options?: RequestInit): Promise<Attrition> => {
+export const CreateAttritionBody = zod.object({
+  "employeeId": zod.number(),
+  "businessUnitId": zod.number(),
+  "attritionType": zod.enum(['voluntary', 'involuntary']),
+  "reason": zod.string().nullish(),
+  "exitDate": zod.string()
+})
 
-  return customFetch<Attrition>(getCreateAttritionUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(attritionInput)
-  }
-);}
-
-
-
-
-export const getCreateAttritionMutationOptions = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAttrition>>, TError,{data: BodyType<AttritionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createAttrition>>, TError,{data: BodyType<AttritionInput>}, TContext> => {
-
-const mutationKey = ['createAttrition'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createAttrition>>, {data: BodyType<AttritionInput>}> = (props) => {
-          const {data} = props ?? {};
-
-          return  createAttrition(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CreateAttritionMutationResult = NonNullable<Awaited<ReturnType<typeof createAttrition>>>
-    export type CreateAttritionMutationBody = BodyType<AttritionInput>
-    export type CreateAttritionMutationError = ErrorType<Error>
-
-    /**
- * @summary Create an attrition record
- */
-export const useCreateAttrition = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAttrition>>, TError,{data: BodyType<AttritionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof createAttrition>>,
-        TError,
-        {data: BodyType<AttritionInput>},
-        TContext
-      > => {
-      return useMutation(getCreateAttritionMutationOptions(options));
-    }
-
-export const getGetAttritionUrl = (id: number,) => {
-
-
-
-
-  return `/api/attrition/${id}`
-}
-
-/**
- * @summary Get an attrition record
- */
-export const getAttrition = async (id: number, options?: RequestInit): Promise<Attrition> => {
-
-  return customFetch<Attrition>(getGetAttritionUrl(id),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetAttritionQueryKey = (id: number,) => {
-    return [
-    `/api/attrition/${id}`
-    ] as const;
-    }
-
-
-export const getGetAttritionQueryOptions = <TData = Awaited<ReturnType<typeof getAttrition>>, TError = ErrorType<Error>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAttrition>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetAttritionQueryKey(id);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAttrition>>> = ({ signal }) => getAttrition(id, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAttrition>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetAttritionQueryResult = NonNullable<Awaited<ReturnType<typeof getAttrition>>>
-export type GetAttritionQueryError = ErrorType<Error>
+export const CreateAttritionResponse = zod.object({
+  "id": zod.number(),
+  "employeeId": zod.number(),
+  "employeeName": zod.string().nullish(),
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string().nullish(),
+  "attritionType": zod.enum(['voluntary', 'involuntary']),
+  "reason": zod.string().nullish(),
+  "exitDate": zod.string(),
+  "createdAt": zod.string()
+})
 
 
 /**
  * @summary Get an attrition record
  */
+export const GetAttritionParams = zod.object({
+  "id": zod.coerce.number()
+})
 
-export function useGetAttrition<TData = Awaited<ReturnType<typeof getAttrition>>, TError = ErrorType<Error>>(
- id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAttrition>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const GetAttritionResponse = zod.object({
+  "id": zod.number(),
+  "employeeId": zod.number(),
+  "employeeName": zod.string().nullish(),
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string().nullish(),
+  "attritionType": zod.enum(['voluntary', 'involuntary']),
+  "reason": zod.string().nullish(),
+  "exitDate": zod.string(),
+  "createdAt": zod.string()
+})
 
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getGetAttritionQueryOptions(id,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getDeleteAttritionUrl = (id: number,) => {
-
-
-
-
-  return `/api/attrition/${id}`
-}
 
 /**
  * @summary Delete an attrition record
  */
-export const deleteAttrition = async (id: number, options?: RequestInit): Promise<void> => {
+export const DeleteAttritionParams = zod.object({
+  "id": zod.coerce.number()
+})
 
-  return customFetch<void>(getDeleteAttritionUrl(id),
-  {
-    ...options,
-    method: 'DELETE'
-
-
-  }
-);}
-
-
-
-
-export const getDeleteAttritionMutationOptions = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAttrition>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteAttrition>>, TError,{id: number}, TContext> => {
-
-const mutationKey = ['deleteAttrition'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteAttrition>>, {id: number}> = (props) => {
-          const {id} = props ?? {};
-
-          return  deleteAttrition(id,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteAttritionMutationResult = NonNullable<Awaited<ReturnType<typeof deleteAttrition>>>
-
-    export type DeleteAttritionMutationError = ErrorType<Error>
-
-    /**
- * @summary Delete an attrition record
- */
-export const useDeleteAttrition = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAttrition>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof deleteAttrition>>,
-        TError,
-        {id: number},
-        TContext
-      > => {
-      return useMutation(getDeleteAttritionMutationOptions(options));
-    }
-
-export const getListProbationUrl = (params?: ListProbationParams,) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0 ? `/api/probation?${stringifiedParams}` : `/api/probation`
-}
-
-/**
- * @summary List probation records in scope
- */
-export const listProbation = async (params?: ListProbationParams, options?: RequestInit): Promise<Probation[]> => {
-
-  return customFetch<Probation[]>(getListProbationUrl(params),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getListProbationQueryKey = (params?: ListProbationParams,) => {
-    return [
-    `/api/probation`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getListProbationQueryOptions = <TData = Awaited<ReturnType<typeof listProbation>>, TError = ErrorType<unknown>>(params?: ListProbationParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listProbation>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getListProbationQueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listProbation>>> = ({ signal }) => listProbation(params, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listProbation>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type ListProbationQueryResult = NonNullable<Awaited<ReturnType<typeof listProbation>>>
-export type ListProbationQueryError = ErrorType<unknown>
+export const DeleteAttritionResponse = zod.void()
 
 
 /**
  * @summary List probation records in scope
  */
+export const ListProbationQueryParams = zod.object({
+  "businessUnitId": zod.coerce.number().optional(),
+  "status": zod.coerce.string().optional()
+})
 
-export function useListProbation<TData = Awaited<ReturnType<typeof listProbation>>, TError = ErrorType<unknown>>(
- params?: ListProbationParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listProbation>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const ListProbationResponseItem = zod.object({
+  "id": zod.number(),
+  "employeeId": zod.number(),
+  "employeeName": zod.string().nullish(),
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string().nullish(),
+  "startDate": zod.string(),
+  "endDate": zod.string(),
+  "status": zod.enum(['pending', 'passed', 'failed', 'extended']),
+  "reviewDate": zod.string().nullish(),
+  "outcome": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const ListProbationResponse = zod.array(ListProbationResponseItem)
 
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getListProbationQueryOptions(params,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getCreateProbationUrl = () => {
-
-
-
-
-  return `/api/probation`
-}
 
 /**
  * @summary Create a probation record
  */
-export const createProbation = async (probationInput: ProbationInput, options?: RequestInit): Promise<Probation> => {
+export const CreateProbationBody = zod.object({
+  "employeeId": zod.number(),
+  "businessUnitId": zod.number(),
+  "startDate": zod.string(),
+  "endDate": zod.string(),
+  "status": zod.enum(['pending', 'passed', 'failed', 'extended']),
+  "reviewDate": zod.string().nullish(),
+  "outcome": zod.string().nullish()
+})
 
-  return customFetch<Probation>(getCreateProbationUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(probationInput)
-  }
-);}
-
-
-
-
-export const getCreateProbationMutationOptions = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProbation>>, TError,{data: BodyType<ProbationInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createProbation>>, TError,{data: BodyType<ProbationInput>}, TContext> => {
-
-const mutationKey = ['createProbation'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createProbation>>, {data: BodyType<ProbationInput>}> = (props) => {
-          const {data} = props ?? {};
-
-          return  createProbation(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CreateProbationMutationResult = NonNullable<Awaited<ReturnType<typeof createProbation>>>
-    export type CreateProbationMutationBody = BodyType<ProbationInput>
-    export type CreateProbationMutationError = ErrorType<Error>
-
-    /**
- * @summary Create a probation record
- */
-export const useCreateProbation = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProbation>>, TError,{data: BodyType<ProbationInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof createProbation>>,
-        TError,
-        {data: BodyType<ProbationInput>},
-        TContext
-      > => {
-      return useMutation(getCreateProbationMutationOptions(options));
-    }
-
-export const getGetProbationUrl = (id: number,) => {
-
-
-
-
-  return `/api/probation/${id}`
-}
-
-/**
- * @summary Get a probation record
- */
-export const getProbation = async (id: number, options?: RequestInit): Promise<Probation> => {
-
-  return customFetch<Probation>(getGetProbationUrl(id),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetProbationQueryKey = (id: number,) => {
-    return [
-    `/api/probation/${id}`
-    ] as const;
-    }
-
-
-export const getGetProbationQueryOptions = <TData = Awaited<ReturnType<typeof getProbation>>, TError = ErrorType<Error>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProbation>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetProbationQueryKey(id);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getProbation>>> = ({ signal }) => getProbation(id, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getProbation>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetProbationQueryResult = NonNullable<Awaited<ReturnType<typeof getProbation>>>
-export type GetProbationQueryError = ErrorType<Error>
+export const CreateProbationResponse = zod.object({
+  "id": zod.number(),
+  "employeeId": zod.number(),
+  "employeeName": zod.string().nullish(),
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string().nullish(),
+  "startDate": zod.string(),
+  "endDate": zod.string(),
+  "status": zod.enum(['pending', 'passed', 'failed', 'extended']),
+  "reviewDate": zod.string().nullish(),
+  "outcome": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
 
 
 /**
  * @summary Get a probation record
  */
+export const GetProbationParams = zod.object({
+  "id": zod.coerce.number()
+})
 
-export function useGetProbation<TData = Awaited<ReturnType<typeof getProbation>>, TError = ErrorType<Error>>(
- id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProbation>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const GetProbationResponse = zod.object({
+  "id": zod.number(),
+  "employeeId": zod.number(),
+  "employeeName": zod.string().nullish(),
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string().nullish(),
+  "startDate": zod.string(),
+  "endDate": zod.string(),
+  "status": zod.enum(['pending', 'passed', 'failed', 'extended']),
+  "reviewDate": zod.string().nullish(),
+  "outcome": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
 
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getGetProbationQueryOptions(id,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getUpdateProbationUrl = (id: number,) => {
-
-
-
-
-  return `/api/probation/${id}`
-}
 
 /**
  * @summary Update a probation record
  */
-export const updateProbation = async (id: number,
-    probationUpdate: ProbationUpdate, options?: RequestInit): Promise<Probation> => {
+export const UpdateProbationParams = zod.object({
+  "id": zod.coerce.number()
+})
 
-  return customFetch<Probation>(getUpdateProbationUrl(id),
-  {
-    ...options,
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(probationUpdate)
-  }
-);}
+export const UpdateProbationBody = zod.object({
+  "startDate": zod.string().optional(),
+  "endDate": zod.string().optional(),
+  "status": zod.enum(['pending', 'passed', 'failed', 'extended']).optional(),
+  "reviewDate": zod.string().nullish(),
+  "outcome": zod.string().nullish()
+})
 
+export const UpdateProbationResponse = zod.object({
+  "id": zod.number(),
+  "employeeId": zod.number(),
+  "employeeName": zod.string().nullish(),
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string().nullish(),
+  "startDate": zod.string(),
+  "endDate": zod.string(),
+  "status": zod.enum(['pending', 'passed', 'failed', 'extended']),
+  "reviewDate": zod.string().nullish(),
+  "outcome": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
 
-
-
-export const getUpdateProbationMutationOptions = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateProbation>>, TError,{id: number;data: BodyType<ProbationUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof updateProbation>>, TError,{id: number;data: BodyType<ProbationUpdate>}, TContext> => {
-
-const mutationKey = ['updateProbation'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateProbation>>, {id: number;data: BodyType<ProbationUpdate>}> = (props) => {
-          const {id,data} = props ?? {};
-
-          return  updateProbation(id,data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UpdateProbationMutationResult = NonNullable<Awaited<ReturnType<typeof updateProbation>>>
-    export type UpdateProbationMutationBody = BodyType<ProbationUpdate>
-    export type UpdateProbationMutationError = ErrorType<Error>
-
-    /**
- * @summary Update a probation record
- */
-export const useUpdateProbation = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateProbation>>, TError,{id: number;data: BodyType<ProbationUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof updateProbation>>,
-        TError,
-        {id: number;data: BodyType<ProbationUpdate>},
-        TContext
-      > => {
-      return useMutation(getUpdateProbationMutationOptions(options));
-    }
-
-export const getDeleteProbationUrl = (id: number,) => {
-
-
-
-
-  return `/api/probation/${id}`
-}
 
 /**
  * @summary Delete a probation record
  */
-export const deleteProbation = async (id: number, options?: RequestInit): Promise<void> => {
+export const DeleteProbationParams = zod.object({
+  "id": zod.coerce.number()
+})
 
-  return customFetch<void>(getDeleteProbationUrl(id),
-  {
-    ...options,
-    method: 'DELETE'
-
-
-  }
-);}
-
-
-
-
-export const getDeleteProbationMutationOptions = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteProbation>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteProbation>>, TError,{id: number}, TContext> => {
-
-const mutationKey = ['deleteProbation'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteProbation>>, {id: number}> = (props) => {
-          const {id} = props ?? {};
-
-          return  deleteProbation(id,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteProbationMutationResult = NonNullable<Awaited<ReturnType<typeof deleteProbation>>>
-
-    export type DeleteProbationMutationError = ErrorType<Error>
-
-    /**
- * @summary Delete a probation record
- */
-export const useDeleteProbation = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteProbation>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof deleteProbation>>,
-        TError,
-        {id: number},
-        TContext
-      > => {
-      return useMutation(getDeleteProbationMutationOptions(options));
-    }
-
-export const getGetDashboardKpisUrl = (params?: GetDashboardKpisParams,) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0 ? `/api/dashboard/kpis?${stringifiedParams}` : `/api/dashboard/kpis`
-}
-
-/**
- * @summary Get scope-aware KPIs
- */
-export const getDashboardKpis = async (params?: GetDashboardKpisParams, options?: RequestInit): Promise<Kpis> => {
-
-  return customFetch<Kpis>(getGetDashboardKpisUrl(params),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetDashboardKpisQueryKey = (params?: GetDashboardKpisParams,) => {
-    return [
-    `/api/dashboard/kpis`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getGetDashboardKpisQueryOptions = <TData = Awaited<ReturnType<typeof getDashboardKpis>>, TError = ErrorType<unknown>>(params?: GetDashboardKpisParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDashboardKpis>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetDashboardKpisQueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDashboardKpis>>> = ({ signal }) => getDashboardKpis(params, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDashboardKpis>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetDashboardKpisQueryResult = NonNullable<Awaited<ReturnType<typeof getDashboardKpis>>>
-export type GetDashboardKpisQueryError = ErrorType<unknown>
+export const DeleteProbationResponse = zod.void()
 
 
 /**
  * @summary Get scope-aware KPIs
  */
+export const GetDashboardKpisQueryParams = zod.object({
+  "businessUnitId": zod.coerce.number().optional()
+})
 
-export function useGetDashboardKpis<TData = Awaited<ReturnType<typeof getDashboardKpis>>, TError = ErrorType<unknown>>(
- params?: GetDashboardKpisParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDashboardKpis>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getGetDashboardKpisQueryOptions(params,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getGetDashboardComparisonUrl = () => {
-
-
-
-
-  return `/api/dashboard/comparison`
-}
-
-/**
- * @summary Compare KPIs across business units (CHRO/Director/Admin)
- */
-export const getDashboardComparison = async ( options?: RequestInit): Promise<ComparisonRow[]> => {
-
-  return customFetch<ComparisonRow[]>(getGetDashboardComparisonUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetDashboardComparisonQueryKey = () => {
-    return [
-    `/api/dashboard/comparison`
-    ] as const;
-    }
-
-
-export const getGetDashboardComparisonQueryOptions = <TData = Awaited<ReturnType<typeof getDashboardComparison>>, TError = ErrorType<Error>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDashboardComparison>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetDashboardComparisonQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDashboardComparison>>> = ({ signal }) => getDashboardComparison({ signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDashboardComparison>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetDashboardComparisonQueryResult = NonNullable<Awaited<ReturnType<typeof getDashboardComparison>>>
-export type GetDashboardComparisonQueryError = ErrorType<Error>
+export const GetDashboardKpisResponse = zod.object({
+  "headcount": zod.number(),
+  "saudizationPct": zod.number(),
+  "femalePct": zod.number(),
+  "openRoles": zod.number(),
+  "attritionPct": zod.number(),
+  "openErCases": zod.number()
+})
 
 
 /**
  * @summary Compare KPIs across business units (CHRO/Director/Admin)
  */
-
-export function useGetDashboardComparison<TData = Awaited<ReturnType<typeof getDashboardComparison>>, TError = ErrorType<Error>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDashboardComparison>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getGetDashboardComparisonQueryOptions(options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getGetDashboardTrendsUrl = (params?: GetDashboardTrendsParams,) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0 ? `/api/dashboard/trends?${stringifiedParams}` : `/api/dashboard/trends`
-}
-
-/**
- * @summary Get monthly headcount and attrition trend
- */
-export const getDashboardTrends = async (params?: GetDashboardTrendsParams, options?: RequestInit): Promise<TrendPoint[]> => {
-
-  return customFetch<TrendPoint[]>(getGetDashboardTrendsUrl(params),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetDashboardTrendsQueryKey = (params?: GetDashboardTrendsParams,) => {
-    return [
-    `/api/dashboard/trends`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getGetDashboardTrendsQueryOptions = <TData = Awaited<ReturnType<typeof getDashboardTrends>>, TError = ErrorType<unknown>>(params?: GetDashboardTrendsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDashboardTrends>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetDashboardTrendsQueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDashboardTrends>>> = ({ signal }) => getDashboardTrends(params, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDashboardTrends>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetDashboardTrendsQueryResult = NonNullable<Awaited<ReturnType<typeof getDashboardTrends>>>
-export type GetDashboardTrendsQueryError = ErrorType<unknown>
+export const GetDashboardComparisonResponseItem = zod.object({
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string(),
+  "headcount": zod.number(),
+  "saudizationPct": zod.number(),
+  "femalePct": zod.number(),
+  "openRoles": zod.number(),
+  "attritionPct": zod.number(),
+  "openErCases": zod.number()
+})
+export const GetDashboardComparisonResponse = zod.array(GetDashboardComparisonResponseItem)
 
 
 /**
  * @summary Get monthly headcount and attrition trend
  */
+export const GetDashboardTrendsQueryParams = zod.object({
+  "businessUnitId": zod.coerce.number().optional()
+})
 
-export function useGetDashboardTrends<TData = Awaited<ReturnType<typeof getDashboardTrends>>, TError = ErrorType<unknown>>(
- params?: GetDashboardTrendsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDashboardTrends>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getGetDashboardTrendsQueryOptions(params,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getGetIntelligenceHealthScoresUrl = (params?: GetIntelligenceHealthScoresParams,) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0 ? `/api/intelligence/health-scores?${stringifiedParams}` : `/api/intelligence/health-scores`
-}
-
-/**
- * @summary Business-unit health scores (scope-aware)
- */
-export const getIntelligenceHealthScores = async (params?: GetIntelligenceHealthScoresParams, options?: RequestInit): Promise<HealthScore[]> => {
-
-  return customFetch<HealthScore[]>(getGetIntelligenceHealthScoresUrl(params),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetIntelligenceHealthScoresQueryKey = (params?: GetIntelligenceHealthScoresParams,) => {
-    return [
-    `/api/intelligence/health-scores`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getGetIntelligenceHealthScoresQueryOptions = <TData = Awaited<ReturnType<typeof getIntelligenceHealthScores>>, TError = ErrorType<unknown>>(params?: GetIntelligenceHealthScoresParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceHealthScores>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetIntelligenceHealthScoresQueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getIntelligenceHealthScores>>> = ({ signal }) => getIntelligenceHealthScores(params, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceHealthScores>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetIntelligenceHealthScoresQueryResult = NonNullable<Awaited<ReturnType<typeof getIntelligenceHealthScores>>>
-export type GetIntelligenceHealthScoresQueryError = ErrorType<unknown>
+export const GetDashboardTrendsResponseItem = zod.object({
+  "month": zod.string(),
+  "headcount": zod.number(),
+  "exits": zod.number()
+})
+export const GetDashboardTrendsResponse = zod.array(GetDashboardTrendsResponseItem)
 
 
 /**
  * @summary Business-unit health scores (scope-aware)
  */
+export const GetIntelligenceHealthScoresQueryParams = zod.object({
+  "businessUnitId": zod.coerce.number().optional()
+})
 
-export function useGetIntelligenceHealthScores<TData = Awaited<ReturnType<typeof getIntelligenceHealthScores>>, TError = ErrorType<unknown>>(
- params?: GetIntelligenceHealthScoresParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceHealthScores>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getGetIntelligenceHealthScoresQueryOptions(params,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getGetIntelligenceRiskUrl = (params?: GetIntelligenceRiskParams,) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0 ? `/api/intelligence/risk?${stringifiedParams}` : `/api/intelligence/risk`
-}
-
-/**
- * @summary Business-unit workforce risk profiles (scope-aware)
- */
-export const getIntelligenceRisk = async (params?: GetIntelligenceRiskParams, options?: RequestInit): Promise<RiskProfile[]> => {
-
-  return customFetch<RiskProfile[]>(getGetIntelligenceRiskUrl(params),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetIntelligenceRiskQueryKey = (params?: GetIntelligenceRiskParams,) => {
-    return [
-    `/api/intelligence/risk`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getGetIntelligenceRiskQueryOptions = <TData = Awaited<ReturnType<typeof getIntelligenceRisk>>, TError = ErrorType<unknown>>(params?: GetIntelligenceRiskParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceRisk>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetIntelligenceRiskQueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getIntelligenceRisk>>> = ({ signal }) => getIntelligenceRisk(params, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceRisk>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetIntelligenceRiskQueryResult = NonNullable<Awaited<ReturnType<typeof getIntelligenceRisk>>>
-export type GetIntelligenceRiskQueryError = ErrorType<unknown>
+export const GetIntelligenceHealthScoresResponseItem = zod.object({
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string(),
+  "headcount": zod.number(),
+  "score": zod.number(),
+  "rating": zod.string(),
+  "subScores": zod.array(zod.object({
+  "key": zod.string(),
+  "label": zod.string(),
+  "score": zod.number(),
+  "weight": zod.number(),
+  "value": zod.string()
+}))
+})
+export const GetIntelligenceHealthScoresResponse = zod.array(GetIntelligenceHealthScoresResponseItem)
 
 
 /**
  * @summary Business-unit workforce risk profiles (scope-aware)
  */
+export const GetIntelligenceRiskQueryParams = zod.object({
+  "businessUnitId": zod.coerce.number().optional()
+})
 
-export function useGetIntelligenceRisk<TData = Awaited<ReturnType<typeof getIntelligenceRisk>>, TError = ErrorType<unknown>>(
- params?: GetIntelligenceRiskParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceRisk>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getGetIntelligenceRiskQueryOptions(params,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getGetIntelligenceBenchmarkingUrl = () => {
-
-
-
-
-  return `/api/intelligence/benchmarking`
-}
-
-/**
- * @summary Cross-business-unit benchmarking (CHRO/Director/Admin)
- */
-export const getIntelligenceBenchmarking = async ( options?: RequestInit): Promise<Benchmarking> => {
-
-  return customFetch<Benchmarking>(getGetIntelligenceBenchmarkingUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetIntelligenceBenchmarkingQueryKey = () => {
-    return [
-    `/api/intelligence/benchmarking`
-    ] as const;
-    }
-
-
-export const getGetIntelligenceBenchmarkingQueryOptions = <TData = Awaited<ReturnType<typeof getIntelligenceBenchmarking>>, TError = ErrorType<Error>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceBenchmarking>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetIntelligenceBenchmarkingQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getIntelligenceBenchmarking>>> = ({ signal }) => getIntelligenceBenchmarking({ signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceBenchmarking>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetIntelligenceBenchmarkingQueryResult = NonNullable<Awaited<ReturnType<typeof getIntelligenceBenchmarking>>>
-export type GetIntelligenceBenchmarkingQueryError = ErrorType<Error>
+export const GetIntelligenceRiskResponseItem = zod.object({
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string(),
+  "headcount": zod.number(),
+  "workforceRisk": zod.object({
+  "score": zod.number(),
+  "level": zod.string(),
+  "signals": zod.array(zod.object({
+  "label": zod.string(),
+  "detail": zod.string(),
+  "severity": zod.string()
+}))
+}),
+  "attritionRisk": zod.object({
+  "score": zod.number(),
+  "level": zod.string(),
+  "signals": zod.array(zod.object({
+  "label": zod.string(),
+  "detail": zod.string(),
+  "severity": zod.string()
+}))
+}),
+  "recruitmentRisk": zod.object({
+  "score": zod.number(),
+  "level": zod.string(),
+  "signals": zod.array(zod.object({
+  "label": zod.string(),
+  "detail": zod.string(),
+  "severity": zod.string()
+}))
+}),
+  "employeeRelationsRisk": zod.object({
+  "score": zod.number(),
+  "level": zod.string(),
+  "signals": zod.array(zod.object({
+  "label": zod.string(),
+  "detail": zod.string(),
+  "severity": zod.string()
+}))
+})
+})
+export const GetIntelligenceRiskResponse = zod.array(GetIntelligenceRiskResponseItem)
 
 
 /**
  * @summary Cross-business-unit benchmarking (CHRO/Director/Admin)
  */
-
-export function useGetIntelligenceBenchmarking<TData = Awaited<ReturnType<typeof getIntelligenceBenchmarking>>, TError = ErrorType<Error>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceBenchmarking>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getGetIntelligenceBenchmarkingQueryOptions(options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getGetIntelligenceInsightsUrl = (params?: GetIntelligenceInsightsParams,) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0 ? `/api/intelligence/insights?${stringifiedParams}` : `/api/intelligence/insights`
-}
-
-/**
- * @summary Executive insights with recommended actions (scope-aware)
- */
-export const getIntelligenceInsights = async (params?: GetIntelligenceInsightsParams, options?: RequestInit): Promise<ExecutiveInsight[]> => {
-
-  return customFetch<ExecutiveInsight[]>(getGetIntelligenceInsightsUrl(params),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetIntelligenceInsightsQueryKey = (params?: GetIntelligenceInsightsParams,) => {
-    return [
-    `/api/intelligence/insights`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getGetIntelligenceInsightsQueryOptions = <TData = Awaited<ReturnType<typeof getIntelligenceInsights>>, TError = ErrorType<unknown>>(params?: GetIntelligenceInsightsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceInsights>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetIntelligenceInsightsQueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getIntelligenceInsights>>> = ({ signal }) => getIntelligenceInsights(params, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceInsights>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetIntelligenceInsightsQueryResult = NonNullable<Awaited<ReturnType<typeof getIntelligenceInsights>>>
-export type GetIntelligenceInsightsQueryError = ErrorType<unknown>
+export const GetIntelligenceBenchmarkingResponse = zod.object({
+  "generatedAt": zod.string(),
+  "businessUnitCount": zod.number(),
+  "metrics": zod.array(zod.object({
+  "key": zod.string(),
+  "label": zod.string(),
+  "unit": zod.string(),
+  "higherIsBetter": zod.boolean(),
+  "orgAverage": zod.number(),
+  "orgMedian": zod.number(),
+  "best": zod.union([zod.object({
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string(),
+  "value": zod.number()
+}),zod.null()]),
+  "worst": zod.union([zod.object({
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string(),
+  "value": zod.number()
+}),zod.null()]),
+  "rows": zod.array(zod.object({
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string(),
+  "value": zod.number(),
+  "rank": zod.number(),
+  "percentile": zod.number()
+}))
+}))
+})
 
 
 /**
  * @summary Executive insights with recommended actions (scope-aware)
  */
+export const GetIntelligenceInsightsQueryParams = zod.object({
+  "businessUnitId": zod.coerce.number().optional()
+})
 
-export function useGetIntelligenceInsights<TData = Awaited<ReturnType<typeof getIntelligenceInsights>>, TError = ErrorType<unknown>>(
- params?: GetIntelligenceInsightsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceInsights>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getGetIntelligenceInsightsQueryOptions(params,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getGetIntelligenceContextUrl = (params?: GetIntelligenceContextParams,) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0 ? `/api/intelligence/context?${stringifiedParams}` : `/api/intelligence/context`
-}
-
-/**
- * @summary Full workforce context data points (for future AI consumers)
- */
-export const getIntelligenceContext = async (params?: GetIntelligenceContextParams, options?: RequestInit): Promise<WorkforceContext> => {
-
-  return customFetch<WorkforceContext>(getGetIntelligenceContextUrl(params),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetIntelligenceContextQueryKey = (params?: GetIntelligenceContextParams,) => {
-    return [
-    `/api/intelligence/context`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getGetIntelligenceContextQueryOptions = <TData = Awaited<ReturnType<typeof getIntelligenceContext>>, TError = ErrorType<unknown>>(params?: GetIntelligenceContextParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceContext>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetIntelligenceContextQueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getIntelligenceContext>>> = ({ signal }) => getIntelligenceContext(params, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceContext>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetIntelligenceContextQueryResult = NonNullable<Awaited<ReturnType<typeof getIntelligenceContext>>>
-export type GetIntelligenceContextQueryError = ErrorType<unknown>
+export const GetIntelligenceInsightsResponseItem = zod.object({
+  "id": zod.string(),
+  "category": zod.string(),
+  "severity": zod.string(),
+  "title": zod.string(),
+  "narrative": zod.string(),
+  "businessUnitId": zod.number().nullable(),
+  "businessUnitName": zod.string().nullable(),
+  "metrics": zod.array(zod.object({
+  "label": zod.string(),
+  "value": zod.string()
+})),
+  "recommendedActions": zod.array(zod.string())
+})
+export const GetIntelligenceInsightsResponse = zod.array(GetIntelligenceInsightsResponseItem)
 
 
 /**
  * @summary Full workforce context data points (for future AI consumers)
  */
+export const GetIntelligenceContextQueryParams = zod.object({
+  "businessUnitId": zod.coerce.number().optional()
+})
 
-export function useGetIntelligenceContext<TData = Awaited<ReturnType<typeof getIntelligenceContext>>, TError = ErrorType<unknown>>(
- params?: GetIntelligenceContextParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIntelligenceContext>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const GetIntelligenceContextResponse = zod.object({
+  "generatedAt": zod.string(),
+  "policy": zod.record(zod.string(), zod.number()),
+  "scope": zod.object({
+  "canSeeAll": zod.boolean(),
+  "businessUnitIds": zod.array(zod.number())
+}),
+  "org": zod.object({
+  "businessUnitCount": zod.number(),
+  "totalHeadcount": zod.number(),
+  "kpis": zod.object({
+  "headcount": zod.number(),
+  "saudizationPct": zod.number(),
+  "femalePct": zod.number(),
+  "openRoles": zod.number(),
+  "attritionPct": zod.number(),
+  "openErCases": zod.number()
+}),
+  "trends": zod.array(zod.object({
+  "month": zod.string(),
+  "headcount": zod.number(),
+  "exits": zod.number()
+})),
+  "averageHealthScore": zod.number()
+}),
+  "businessUnits": zod.array(zod.object({
+  "businessUnitId": zod.number(),
+  "businessUnitName": zod.string(),
+  "kpis": zod.object({
+  "headcount": zod.number(),
+  "saudizationPct": zod.number(),
+  "femalePct": zod.number(),
+  "openRoles": zod.number(),
+  "attritionPct": zod.number(),
+  "openErCases": zod.number()
+}),
+  "facts": zod.object({
+  "headcount": zod.number(),
+  "saudiPct": zod.number(),
+  "femalePct": zod.number(),
+  "attritionPct": zod.number(),
+  "exitsLast12mo": zod.number(),
+  "exitsRecent3mo": zod.number(),
+  "exitsPrior3mo": zod.number(),
+  "voluntarySharePct": zod.number(),
+  "openRoles": zod.number(),
+  "agingRequisitions": zod.number(),
+  "avgTimeToFillDays": zod.number().nullable(),
+  "openErCases": zod.number(),
+  "highSeverityOpenErCases": zod.number(),
+  "probationEndingSoon": zod.number(),
+  "probationFailRatePct": zod.number()
+}),
+  "healthScore": zod.number(),
+  "healthRating": zod.string(),
+  "risk": zod.object({
+  "workforce": zod.object({
+  "score": zod.number(),
+  "level": zod.string()
+}),
+  "attrition": zod.object({
+  "score": zod.number(),
+  "level": zod.string()
+}),
+  "recruitment": zod.object({
+  "score": zod.number(),
+  "level": zod.string()
+}),
+  "employeeRelations": zod.object({
+  "score": zod.number(),
+  "level": zod.string()
+})
+})
+}))
+})
 
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getGetIntelligenceContextQueryOptions(params,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getListUsersUrl = () => {
-
-
-
-
-  return `/api/admin/users`
-}
 
 /**
  * @summary List users (Admin only)
  */
-export const listUsers = async ( options?: RequestInit): Promise<User[]> => {
+export const ListUsersResponseItem = zod.object({
+  "id": zod.number(),
+  "email": zod.string(),
+  "displayName": zod.string(),
+  "role": zod.enum(['HRBP', 'HR_DIRECTOR', 'CHRO', 'ADMIN']),
+  "businessUnits": zod.array(zod.object({
+  "id": zod.number(),
+  "name": zod.string()
+})),
+  "businessUnitIds": zod.array(zod.number()),
+  "entraObjectId": zod.string().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const ListUsersResponse = zod.array(ListUsersResponseItem)
 
-  return customFetch<User[]>(getListUsersUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getListUsersQueryKey = () => {
-    return [
-    `/api/admin/users`
-    ] as const;
-    }
-
-
-export const getListUsersQueryOptions = <TData = Awaited<ReturnType<typeof listUsers>>, TError = ErrorType<Error>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getListUsersQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listUsers>>> = ({ signal }) => listUsers({ signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type ListUsersQueryResult = NonNullable<Awaited<ReturnType<typeof listUsers>>>
-export type ListUsersQueryError = ErrorType<Error>
-
-
-/**
- * @summary List users (Admin only)
- */
-
-export function useListUsers<TData = Awaited<ReturnType<typeof listUsers>>, TError = ErrorType<Error>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getListUsersQueryOptions(options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getCreateUserUrl = () => {
-
-
-
-
-  return `/api/admin/users`
-}
 
 /**
  * @summary Create a user (Admin only)
  */
-export const createUser = async (userInput: UserInput, options?: RequestInit): Promise<User> => {
-
-  return customFetch<User>(getCreateUserUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(userInput)
-  }
-);}
 
 
 
 
-export const getCreateUserMutationOptions = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUser>>, TError,{data: BodyType<UserInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createUser>>, TError,{data: BodyType<UserInput>}, TContext> => {
+export const CreateUserBody = zod.object({
+  "email": zod.string().min(1),
+  "displayName": zod.string().min(1),
+  "role": zod.enum(['HRBP', 'HR_DIRECTOR', 'CHRO', 'ADMIN']),
+  "businessUnitIds": zod.array(zod.number()).optional(),
+  "isActive": zod.boolean().optional()
+})
 
-const mutationKey = ['createUser'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createUser>>, {data: BodyType<UserInput>}> = (props) => {
-          const {data} = props ?? {};
-
-          return  createUser(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CreateUserMutationResult = NonNullable<Awaited<ReturnType<typeof createUser>>>
-    export type CreateUserMutationBody = BodyType<UserInput>
-    export type CreateUserMutationError = ErrorType<Error>
-
-    /**
- * @summary Create a user (Admin only)
- */
-export const useCreateUser = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUser>>, TError,{data: BodyType<UserInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof createUser>>,
-        TError,
-        {data: BodyType<UserInput>},
-        TContext
-      > => {
-      return useMutation(getCreateUserMutationOptions(options));
-    }
-
-export const getGetUserUrl = (id: number,) => {
-
-
-
-
-  return `/api/admin/users/${id}`
-}
-
-/**
- * @summary Get a user (Admin only)
- */
-export const getUser = async (id: number, options?: RequestInit): Promise<User> => {
-
-  return customFetch<User>(getGetUserUrl(id),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetUserQueryKey = (id: number,) => {
-    return [
-    `/api/admin/users/${id}`
-    ] as const;
-    }
-
-
-export const getGetUserQueryOptions = <TData = Awaited<ReturnType<typeof getUser>>, TError = ErrorType<Error>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUser>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetUserQueryKey(id);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUser>>> = ({ signal }) => getUser(id, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUser>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetUserQueryResult = NonNullable<Awaited<ReturnType<typeof getUser>>>
-export type GetUserQueryError = ErrorType<Error>
+export const CreateUserResponse = zod.object({
+  "id": zod.number(),
+  "email": zod.string(),
+  "displayName": zod.string(),
+  "role": zod.enum(['HRBP', 'HR_DIRECTOR', 'CHRO', 'ADMIN']),
+  "businessUnits": zod.array(zod.object({
+  "id": zod.number(),
+  "name": zod.string()
+})),
+  "businessUnitIds": zod.array(zod.number()),
+  "entraObjectId": zod.string().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
 
 
 /**
  * @summary Get a user (Admin only)
  */
+export const GetUserParams = zod.object({
+  "id": zod.coerce.number()
+})
 
-export function useGetUser<TData = Awaited<ReturnType<typeof getUser>>, TError = ErrorType<Error>>(
- id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUser>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const GetUserResponse = zod.object({
+  "id": zod.number(),
+  "email": zod.string(),
+  "displayName": zod.string(),
+  "role": zod.enum(['HRBP', 'HR_DIRECTOR', 'CHRO', 'ADMIN']),
+  "businessUnits": zod.array(zod.object({
+  "id": zod.number(),
+  "name": zod.string()
+})),
+  "businessUnitIds": zod.array(zod.number()),
+  "entraObjectId": zod.string().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
 
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getGetUserQueryOptions(id,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getUpdateUserUrl = (id: number,) => {
-
-
-
-
-  return `/api/admin/users/${id}`
-}
 
 /**
  * @summary Update a user (Admin only)
  */
-export const updateUser = async (id: number,
-    userUpdate: UserUpdate, options?: RequestInit): Promise<User> => {
-
-  return customFetch<User>(getUpdateUserUrl(id),
-  {
-    ...options,
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(userUpdate)
-  }
-);}
-
-
-
-
-export const getUpdateUserMutationOptions = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUser>>, TError,{id: number;data: BodyType<UserUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof updateUser>>, TError,{id: number;data: BodyType<UserUpdate>}, TContext> => {
-
-const mutationKey = ['updateUser'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateUser>>, {id: number;data: BodyType<UserUpdate>}> = (props) => {
-          const {id,data} = props ?? {};
-
-          return  updateUser(id,data,requestOptions)
-        }
+export const UpdateUserParams = zod.object({
+  "id": zod.coerce.number()
+})
 
 
 
 
 
+export const UpdateUserBody = zod.object({
+  "email": zod.string().min(1).optional(),
+  "displayName": zod.string().min(1).optional(),
+  "role": zod.enum(['HRBP', 'HR_DIRECTOR', 'CHRO', 'ADMIN']).optional(),
+  "businessUnitIds": zod.array(zod.number()).optional(),
+  "isActive": zod.boolean().optional()
+})
 
-  return  { mutationFn, ...mutationOptions }}
+export const UpdateUserResponse = zod.object({
+  "id": zod.number(),
+  "email": zod.string(),
+  "displayName": zod.string(),
+  "role": zod.enum(['HRBP', 'HR_DIRECTOR', 'CHRO', 'ADMIN']),
+  "businessUnits": zod.array(zod.object({
+  "id": zod.number(),
+  "name": zod.string()
+})),
+  "businessUnitIds": zod.array(zod.number()),
+  "entraObjectId": zod.string().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
 
-    export type UpdateUserMutationResult = NonNullable<Awaited<ReturnType<typeof updateUser>>>
-    export type UpdateUserMutationBody = BodyType<UserUpdate>
-    export type UpdateUserMutationError = ErrorType<Error>
-
-    /**
- * @summary Update a user (Admin only)
- */
-export const useUpdateUser = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUser>>, TError,{id: number;data: BodyType<UserUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof updateUser>>,
-        TError,
-        {id: number;data: BodyType<UserUpdate>},
-        TContext
-      > => {
-      return useMutation(getUpdateUserMutationOptions(options));
-    }
-
-export const getDeleteUserUrl = (id: number,) => {
-
-
-
-
-  return `/api/admin/users/${id}`
-}
 
 /**
  * @summary Delete a user (Admin only)
  */
-export const deleteUser = async (id: number, options?: RequestInit): Promise<void> => {
+export const DeleteUserParams = zod.object({
+  "id": zod.coerce.number()
+})
 
-  return customFetch<void>(getDeleteUserUrl(id),
-  {
-    ...options,
-    method: 'DELETE'
-
-
-  }
-);}
-
-
-
-
-export const getDeleteUserMutationOptions = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteUser>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteUser>>, TError,{id: number}, TContext> => {
-
-const mutationKey = ['deleteUser'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteUser>>, {id: number}> = (props) => {
-          const {id} = props ?? {};
-
-          return  deleteUser(id,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteUserMutationResult = NonNullable<Awaited<ReturnType<typeof deleteUser>>>
-
-    export type DeleteUserMutationError = ErrorType<Error>
-
-    /**
- * @summary Delete a user (Admin only)
- */
-export const useDeleteUser = <TError = ErrorType<Error>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteUser>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof deleteUser>>,
-        TError,
-        {id: number},
-        TContext
-      > => {
-      return useMutation(getDeleteUserMutationOptions(options));
-    }
-
-export const getListAuditLogUrl = (params?: ListAuditLogParams,) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0 ? `/api/audit-log?${stringifiedParams}` : `/api/audit-log`
-}
-
-/**
- * @summary List audit log entries (Admin only)
- */
-export const listAuditLog = async (params?: ListAuditLogParams, options?: RequestInit): Promise<AuditLogEntry[]> => {
-
-  return customFetch<AuditLogEntry[]>(getListAuditLogUrl(params),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getListAuditLogQueryKey = (params?: ListAuditLogParams,) => {
-    return [
-    `/api/audit-log`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getListAuditLogQueryOptions = <TData = Awaited<ReturnType<typeof listAuditLog>>, TError = ErrorType<Error>>(params?: ListAuditLogParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAuditLog>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getListAuditLogQueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAuditLog>>> = ({ signal }) => listAuditLog(params, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAuditLog>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type ListAuditLogQueryResult = NonNullable<Awaited<ReturnType<typeof listAuditLog>>>
-export type ListAuditLogQueryError = ErrorType<Error>
+export const DeleteUserResponse = zod.void()
 
 
 /**
  * @summary List audit log entries (Admin only)
  */
+export const ListAuditLogQueryParams = zod.object({
+  "entityType": zod.coerce.string().optional(),
+  "limit": zod.coerce.number().optional()
+})
 
-export function useListAuditLog<TData = Awaited<ReturnType<typeof listAuditLog>>, TError = ErrorType<Error>>(
- params?: ListAuditLogParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAuditLog>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getListAuditLogQueryOptions(params,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getListNotificationsUrl = () => {
-
-
-
-
-  return `/api/notifications`
-}
-
-/**
- * @summary List rule-based alerts in scope
- */
-export const listNotifications = async ( options?: RequestInit): Promise<Notification[]> => {
-
-  return customFetch<Notification[]>(getListNotificationsUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getListNotificationsQueryKey = () => {
-    return [
-    `/api/notifications`
-    ] as const;
-    }
-
-
-export const getListNotificationsQueryOptions = <TData = Awaited<ReturnType<typeof listNotifications>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listNotifications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getListNotificationsQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listNotifications>>> = ({ signal }) => listNotifications({ signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listNotifications>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type ListNotificationsQueryResult = NonNullable<Awaited<ReturnType<typeof listNotifications>>>
-export type ListNotificationsQueryError = ErrorType<unknown>
+export const ListAuditLogResponseItem = zod.object({
+  "id": zod.number(),
+  "actorUserId": zod.number().nullish(),
+  "actorName": zod.string().nullish(),
+  "action": zod.string(),
+  "entityType": zod.string(),
+  "entityId": zod.number(),
+  "changes": zod.record(zod.string(), zod.unknown()).nullish(),
+  "createdAt": zod.string()
+})
+export const ListAuditLogResponse = zod.array(ListAuditLogResponseItem)
 
 
 /**
  * @summary List rule-based alerts in scope
  */
-
-export function useListNotifications<TData = Awaited<ReturnType<typeof listNotifications>>, TError = ErrorType<unknown>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listNotifications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getListNotificationsQueryOptions(options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
+export const ListNotificationsResponseItem = zod.object({
+  "id": zod.string(),
+  "type": zod.string(),
+  "severity": zod.enum(['info', 'warning', 'critical']),
+  "title": zod.string(),
+  "message": zod.string(),
+  "businessUnitId": zod.number().nullish(),
+  "relatedEntityType": zod.string().nullish(),
+  "relatedEntityId": zod.number().nullish(),
+  "date": zod.string().nullish()
+})
+export const ListNotificationsResponse = zod.array(ListNotificationsResponseItem)
 
 

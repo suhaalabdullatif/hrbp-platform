@@ -9,19 +9,19 @@ import {
 import { businessUnitsTable } from "./businessUnits";
 import { employeesTable } from "./employees";
 
-export const probationTable = pgTable("probation", {
+export const erCasesTable = pgTable("er_cases", {
   id: serial("id").primaryKey(),
-  employeeId: integer("employee_id")
-    .notNull()
-    .references(() => employeesTable.id),
+  caseNumber: text("case_number").notNull().unique(),
+  employeeId: integer("employee_id").references(() => employeesTable.id),
   businessUnitId: integer("business_unit_id")
     .notNull()
     .references(() => businessUnitsTable.id),
-  startDate: date("start_date", { mode: "string" }).notNull(),
-  endDate: date("end_date", { mode: "string" }).notNull(),
+  caseType: text("case_type").notNull(),
+  severity: text("severity").notNull(),
   status: text("status").notNull(),
-  reviewDate: date("review_date", { mode: "string" }),
-  outcome: text("outcome"),
+  openedDate: date("opened_date", { mode: "string" }).notNull(),
+  closedDate: date("closed_date", { mode: "string" }),
+  summary: text("summary"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
@@ -29,5 +29,5 @@ export const probationTable = pgTable("probation", {
     .$onUpdate(() => new Date()),
 });
 
-export type Probation = typeof probationTable.$inferSelect;
-export type InsertProbation = typeof probationTable.$inferInsert;
+export type ErCase = typeof erCasesTable.$inferSelect;
+export type InsertErCase = typeof erCasesTable.$inferInsert;
