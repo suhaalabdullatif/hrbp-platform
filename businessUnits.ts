@@ -1,16 +1,42 @@
-import { pgTable, serial, text, boolean, timestamp } from "drizzle-orm/pg-core";
+import { Router, type IRouter } from "express";
+import { inArray, asc } from "drizzle-orm";
+import { db, businessUnitsTable } from "@workspace/db";
+import { ListBusinessUnitsResponse } from "@workspace/api-zod";
+import { requireAuth } from "../middlewares/auth";
+import { getScope } from "../lib/auth/scope";
+import { iso } from "../lib/serialize";
 
-export const businessUnitsTable = pgTable("business_units", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  code: text("code").notNull().unique(),
-  isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
-});
+const router: IRouter = Router();
 
-export type BusinessUnit = typeof businessUnitsTable.$inferSelect;
-export type InsertBusinessUnit = typeof businessUnitsTable.$inferInsert;
+router.get(
+  "/business-units",
+  requireAuth,
+  async (req, res): Promise<void> => {
+    const scope = getScope(req.auth!);
+
+    let rows: (typeof businessUnitsTable.$inferSelect)[];
+    if (scope.canSeeAll) {
+      rows = await db
+        .select()
+        .from(businessUnitsTable)
+        .orderBy(asc(businessUnitsTable.name));
+    } else if (scope.businessUnitIds.length > 0) {
+      rows = await db
+        .select()
+        .from(businessUnitsTable)
+        .where(inArray(businessUnitsTable.id, scope.businessUnitIds))
+        .orderBy(asc(businessUnitsTable.name));
+    } else {
+      rows = [];
+    }
+
+    const mapped = rows.map((r) => ({
+      ...r,
+      createdAt: iso(r.createdAt),
+      updatedAt: iso(r.updatedAt),
+    }));
+    res.json(ListBusinessUnitsResponse.parse(mapped));
+  },
+);
+
+export default router;
